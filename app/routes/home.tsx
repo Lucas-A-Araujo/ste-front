@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaPlus } from "react-icons/fa";
 import type { Person } from "../types/person";
 
 function HomeContent() {
@@ -59,15 +59,16 @@ function HomeContent() {
                   placeholder="Buscar pessoas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
                 />
               </div>
             </div>
             <button
               onClick={handleNewUser}
-              className="ml-4 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="ml-4 px-4 py-3 bg-primary text-white rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2"
             >
-              Novo pessoa
+              <FaPlus className="h-4 w-4" />
+              Adicionar pessoa
             </button>
           </div>
         </div>

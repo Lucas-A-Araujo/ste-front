@@ -75,7 +75,7 @@ export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelet
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => onEdit(person)}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
+                    className="text-primary hover:text-primary-hover mr-4"
                   >
                     Editar
                   </button>
