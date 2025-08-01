@@ -1,7 +1,7 @@
 import React from "react";
 import type { Person } from "../types/person";
 import { formatCPF, formatDate } from "../types/person";
-import { FaUsers } from "react-icons/fa";
+import noDataSvg from "../../assets/undraw_no-data_ig65.svg";
 
 interface PersonListProps {
   persons: Person[];
@@ -13,8 +13,12 @@ export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelet
   if (persons.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <FaUsers className="mx-auto h-12 w-12" />
+        <div className="mb-6">
+          <img 
+            src={noDataSvg} 
+            alt="Nenhum dado encontrado" 
+            className="mx-auto h-48 w-48 text-gray-400"
+          />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma pessoa cadastrada</h3>
         <p className="text-gray-500">Comece adicionando uma nova pessoa ao sistema.</p>
