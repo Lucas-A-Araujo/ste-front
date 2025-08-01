@@ -1,23 +1,23 @@
 import React from "react";
-import type { User } from "../types/user";
-import { formatCPF, formatDate } from "../types/user";
+import type { Person } from "../types/person";
+import { formatCPF, formatDate } from "../types/person";
 import { FaUsers } from "react-icons/fa";
 
-interface UserListProps {
-  users: User[];
-  onEdit: (user: User) => void;
+interface PersonListProps {
+  persons: Person[];
+  onEdit: (person: Person) => void;
   onDelete: (id: string) => void;
 }
 
-export const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete }) => {
-  if (users.length === 0) {
+export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelete }) => {
+  if (persons.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-gray-400 mb-4">
           <FaUsers className="mx-auto h-12 w-12" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum usuário cadastrado</h3>
-        <p className="text-gray-500">Comece adicionando um novo usuário ao sistema.</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma pessoa cadastrada</h3>
+        <p className="text-gray-500">Comece adicionando uma nova pessoa ao sistema.</p>
       </div>
     );
   }
@@ -49,34 +49,34 @@ export const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete }) =
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
+            {persons.map((person) => (
+              <tr key={person.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{user.nome}</div>
+                  <div className="text-sm font-medium text-gray-900">{person.nome}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatCPF(user.cpf)}</div>
+                  <div className="text-sm text-gray-900">{formatCPF(person.cpf)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{user.email || "-"}</div>
+                  <div className="text-sm text-gray-900">{person.email || "-"}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatDate(user.dataNascimento)}</div>
+                  <div className="text-sm text-gray-900">{formatDate(person.dataNascimento)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {user.sexo === "M" ? "Masculino" : user.sexo === "F" ? "Feminino" : "-"}
+                    {person.sexo === "M" ? "Masculino" : person.sexo === "F" ? "Feminino" : "-"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
-                    onClick={() => onEdit(user)}
+                    onClick={() => onEdit(person)}
                     className="text-blue-600 hover:text-blue-900 mr-4"
                   >
                     Editar
                   </button>
                   <button
-                    onClick={() => onDelete(user.id!)}
+                    onClick={() => onDelete(person.id!)}
                     className="text-red-600 hover:text-red-900"
                   >
                     Excluir

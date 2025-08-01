@@ -18,7 +18,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
             <nav className="flex space-x-4">
               <span className="text-sm text-gray-500">
-                Gerenciamento de Usuários
+                Gerenciamento de pessoas
               </span>
             </nav>
           </div>

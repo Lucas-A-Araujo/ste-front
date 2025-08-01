@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const UserSchema = z.object({
+export const PersonSchema = z.object({
   id: z.string().optional(),
   nome: z.string().min(1, "Nome é obrigatório"),
   sexo: z.enum(["M", "F", ""]).optional(),
@@ -11,7 +11,7 @@ export const UserSchema = z.object({
   cpf: z.string().min(1, "CPF é obrigatório"),
 });
 
-export type User = z.infer<typeof UserSchema>;
+export type Person = z.infer<typeof PersonSchema>;
 
 export const validateCPF = (cpf: string): boolean => {
   const cleanCPF = cpf.replace(/\D/g, "");

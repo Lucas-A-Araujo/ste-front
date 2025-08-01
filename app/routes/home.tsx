@@ -1,38 +1,38 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { UserProvider, useUsers } from "../contexts/UserContext";
-import { UserList } from "../components/UserList";
+import { PersonProvider, usePersons } from "../contexts/PersonContext";
+import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
 import { FaSearch } from "react-icons/fa";
-import type { User } from "../types/user";
+import type { Person } from "../types/person";
 
 function HomeContent() {
   const navigate = useNavigate();
-  const { users, deleteUser } = useUsers();
+  const { persons, deletePerson } = usePersons();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm.trim()) {
-      return users;
+      return persons;
     }
     
     const term = searchTerm.toLowerCase();
-    return users.filter(user => 
-      user.nome.toLowerCase().includes(term) ||
-      user.cpf.includes(term) ||
-      (user.email && user.email.toLowerCase().includes(term)) ||
-      (user.naturalidade && user.naturalidade.toLowerCase().includes(term)) ||
-      (user.nacionalidade && user.nacionalidade.toLowerCase().includes(term))
+    return persons.filter(person => 
+      person.nome.toLowerCase().includes(term) ||
+      person.cpf.includes(term) ||
+      (person.email && person.email.toLowerCase().includes(term)) ||
+      (person.naturalidade && person.naturalidade.toLowerCase().includes(term)) ||
+      (person.nacionalidade && person.nacionalidade.toLowerCase().includes(term))
     );
-  }, [users, searchTerm]);
+  }, [persons, searchTerm]);
 
-  const handleEdit = (user: User) => {
-    navigate(`/user/${user.id}`);
+  const handleEdit = (person: Person) => {
+    navigate(`/person/${person.id}`);
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este usuário?")) {
-      deleteUser(id);
+    if (confirm("Tem certeza que deseja excluir este pessoa?")) {
+      deletePerson(id);
     }
   };
 
@@ -45,8 +45,8 @@ function HomeContent() {
       <div className="space-y-6">
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Usuários</h2>
-            <p className="text-gray-600">Gerencie os usuários do sistema</p>
+            <h2 className="text-2xl font-bold text-gray-900">pessoas</h2>
+            <p className="text-gray-600">Gerencie os pessoas do sistema</p>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex-1 max-w-md">
@@ -56,7 +56,7 @@ function HomeContent() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Buscar usuários..."
+                  placeholder="Buscar pessoas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -67,14 +67,14 @@ function HomeContent() {
               onClick={handleNewUser}
               className="ml-4 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Novo Usuário
+              Novo pessoa
             </button>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <UserList
-            users={filteredUsers}
+          <PersonList
+            persons={filteredUsers}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -86,15 +86,15 @@ function HomeContent() {
 
 export function meta() {
   return [
-    { title: "Gerenciamento de Usuários" },
-    { name: "description", content: "Sistema de gerenciamento de usuários" },
+    { title: "Gerenciamento de pessoas" },
+    { name: "description", content: "Sistema de gerenciamento de pessoas" },
   ];
 }
 
 export default function Home() {
   return (
-    <UserProvider>
+    <PersonProvider>
       <HomeContent />
-    </UserProvider>
+    </PersonProvider>
   );
 }

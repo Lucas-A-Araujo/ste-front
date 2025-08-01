@@ -1,19 +1,19 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { User } from "../types/user";
-import { UserSchema, validateCPF, formatCPF } from "../types/user";
+import type { Person } from "../types/person";
+import { PersonSchema, validateCPF, formatCPF } from "../types/person";
 
-interface UserFormProps {
-  user?: User;
-  onSubmit: (data: User) => void;
+interface PersonFormProps {
+  person?: Person;
+  onSubmit: (data: Person) => void;
   onCancel: () => void;
 }
 
-export const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<User>({
-    resolver: zodResolver(UserSchema),
-    defaultValues: user || {
+export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCancel }) => {
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<Person>({
+    resolver: zodResolver(PersonSchema),
+    defaultValues: person || {
       nome: "",
       sexo: "",
       email: "",
@@ -26,6 +26,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) 
 
   const watchedCPF = watch("cpf");
 
+  // Formatação automática do CPF
   React.useEffect(() => {
     if (watchedCPF) {
       const formatted = formatCPF(watchedCPF);
@@ -35,7 +36,8 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) 
     }
   }, [watchedCPF, setValue]);
 
-  const handleFormSubmit = (data: User) => {
+  const handleFormSubmit = (data: Person) => {
+    // Validação adicional do CPF
     const cleanCPF = data.cpf.replace(/\D/g, "");
     if (!validateCPF(cleanCPF)) {
       alert("CPF inválido!");
@@ -164,7 +166,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) 
           type="submit"
           className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          {user ? "Atualizar" : "Cadastrar"}
+          {person ? "Atualizar" : "Cadastrar"}
         </button>
       </div>
     </form>
