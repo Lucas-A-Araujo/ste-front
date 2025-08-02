@@ -5,7 +5,7 @@ import type { Person } from "../../domain/types/person";
 import { PersonSchema, validateCPF, formatCPF } from "../../domain/types/person";
 import { Notification } from "./Notification";
 import { AutocompleteInput } from "./AutocompleteInput";
-import { referenceService } from "../../infrastructure/services/referenceService";
+import { referenceRepository } from "../../infrastructure/repositories/referenceRepository";
 
 interface PersonFormProps {
   person?: Person;
@@ -186,7 +186,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             placeholder="Digite para buscar..."
             value={watch("naturalidade") || ""}
             onChange={(value) => setValue("naturalidade", value)}
-            onSearch={referenceService.searchBirthplaces}
+            onSearch={referenceRepository.searchBirthplaces}
             debounceDelay={300}
           />
 
@@ -195,7 +195,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             placeholder="Digite para buscar..."
             value={watch("nacionalidade") || ""}
             onChange={(value) => setValue("nacionalidade", value)}
-            onSearch={referenceService.searchNationalities}
+            onSearch={referenceRepository.searchNationalities}
             debounceDelay={300}
           />
         </div>

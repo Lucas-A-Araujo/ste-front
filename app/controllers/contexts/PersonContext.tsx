@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Person } from "../../domain/types/person";
-import { personService } from "../../infrastructure/services/personService";
+import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { useApi } from "../hooks/useApi";
 
 interface PersonContextType {
@@ -40,7 +40,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const loadPersons = useCallback(async () => {
     try {
-      const data = await execute(() => personService.getPeople());
+      const data = await execute(() => personRepository.getPeople());
       setPersons(data);
     } catch (error) {
       console.error('Erro ao carregar pessoas:', error);
@@ -57,7 +57,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
     setSearchLoading(true);
     try {
-      const data = await personService.searchPeople(query);
+      const data = await personRepository.searchPeople(query);
       setPersons(data);
     } catch (error) {
       console.error('Erro ao buscar pessoas:', error);
@@ -73,7 +73,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const addPerson = useCallback(async (person: Omit<Person, 'id'>) => {
     try {
-      const newPerson = await personService.createPerson(person);
+      const newPerson = await personRepository.createPerson(person);
       setPersons(prev => [...prev, newPerson]);
     } catch (error) {
       throw error;
@@ -82,7 +82,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const updatePerson = useCallback(async (id: string, updatedPerson: Omit<Person, 'id'>) => {
     try {
-      const updated = await personService.updatePerson(id, updatedPerson);
+      const updated = await personRepository.updatePerson(id, updatedPerson);
       setPersons(prev => 
         prev.map(person => 
           person.id === id ? updated : person
@@ -95,7 +95,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const deletePerson = useCallback(async (id: string) => {
     try {
-      await personService.deletePerson(id);
+      await personRepository.deletePerson(id);
       setPersons(prev => prev.filter(person => person.id !== id));
     } catch (error) {
       throw error;

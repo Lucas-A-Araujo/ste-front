@@ -1,11 +1,11 @@
-import type { Person, APIPerson } from "../types/person";
-import { mapAPIPersonToPerson, mapPersonToAPIPerson } from "../types/person";
+import type { Person, APIPerson } from "../../domain/types/person";
+import { mapAPIPersonToPerson, mapPersonToAPIPerson } from "../../domain/types/person";
 import { httpClient } from "../lib/http";
 import { API_CONFIG } from "../config/api";
 
-export { HttpError as ApiError } from "../lib/http";
+export { HttpError } from "../lib/http";
 
-export const personService = {
+export const personRepository = {
   async getPeople(): Promise<Person[]> {
     const apiPeople: APIPerson[] = await httpClient.get<APIPerson[]>(API_CONFIG.ENDPOINTS.PEOPLE);
     return apiPeople.map(mapAPIPersonToPerson);

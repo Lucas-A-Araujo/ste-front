@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonForm } from "../components/PersonForm";
 import { Layout } from "../components/Layout";
-import { personService } from "../../infrastructure/services/personService";
+import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { HttpError } from "../../infrastructure/lib/http";
 import type { Person } from "../../domain/types/person";
 
@@ -25,7 +25,7 @@ function UserDetailContent() {
       if (id && id !== "new") {
         setLoading(true);
         try {
-          const personData = await personService.getPersonById(id);
+          const personData = await personRepository.getPersonById(id);
           setPerson(personData);
         } catch (error) {
           setError("Pessoa não encontrada");
