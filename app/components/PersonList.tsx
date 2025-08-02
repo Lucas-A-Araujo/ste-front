@@ -8,9 +8,25 @@ interface PersonListProps {
   onEdit: (person: Person) => void;
   onDelete: (id: string) => void;
   deletingId?: string | null;
+  loading?: boolean;
 }
 
-export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelete, deletingId }) => {
+export const PersonList: React.FC<PersonListProps> = ({ 
+  persons, 
+  onEdit, 
+  onDelete, 
+  deletingId,
+  loading = false 
+}) => {
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-gray-600">Carregando pessoas...</p>
+      </div>
+    );
+  }
+
   if (persons.length === 0) {
     return (
       <div className="text-center py-12">

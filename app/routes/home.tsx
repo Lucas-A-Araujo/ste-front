@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
@@ -12,12 +12,15 @@ function HomeContent() {
   const { persons, deletePerson, loading, error, searchLoading, searchPeople, refreshPersons } = usePersons();
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  React.useEffect(() => {
-    searchPeople(debouncedSearchTerm);
-  }, [debouncedSearchTerm, searchPeople]);
+  useEffect(() => {
+    if (hasSearched || searchTerm) {
+      searchPeople(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, searchPeople, hasSearched]);
 
   const handleEdit = (person: Person) => {
     navigate(`/person/${person.id}`);
@@ -43,18 +46,8 @@ function HomeContent() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setHasSearched(true);
   };
-
-  if (loading && persons.length === 0) {
-    return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando pessoas...</p>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -120,6 +113,7 @@ function HomeContent() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             deletingId={deletingId}
+            loading={loading}
           />
         </div>
       </div>

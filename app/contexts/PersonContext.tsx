@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Person } from "../types/person";
 import { personService } from "../services/personService";
@@ -35,6 +35,7 @@ interface PersonProviderProps {
 export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   const [persons, setPersons] = useState<Person[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { loading, error, execute } = useApi<Person[]>();
 
   const loadPersons = useCallback(async () => {
@@ -43,6 +44,8 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
       setPersons(data);
     } catch (error) {
       console.error('Erro ao carregar pessoas:', error);
+    } finally {
+      setInitialLoading(false);
     }
   }, [execute]);
 
@@ -115,7 +118,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const value: PersonContextType = {
     persons,
-    loading,
+    loading: loading || initialLoading,
     searchLoading,
     error,
     addPerson,
