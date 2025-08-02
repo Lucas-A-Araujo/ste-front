@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonForm } from "../components/PersonForm";
 import { Layout } from "../components/Layout";
+import { ProtectedRoute } from "../components/ProtectedRoute";
 import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { HttpError } from "../../infrastructure/lib/http";
 import type { Person } from "../../domain/types/person";
@@ -162,15 +163,17 @@ function UserDetailContent() {
 
 export function meta() {
   return [
-    { title: "Detalhes da pessoa" },
-    { name: "description", content: "Detalhes e edição de pessoa" },
+    { title: "Detalhes da Pessoa - Sistema de Pessoas" },
+    { name: "description", content: "Visualizar e editar dados da pessoa" },
   ];
 }
 
 export default function UserDetail() {
   return (
-    <PersonProvider>
-      <UserDetailContent />
-    </PersonProvider>
+    <ProtectedRoute>
+      <PersonProvider>
+        <UserDetailContent />
+      </PersonProvider>
+    </ProtectedRoute>
   );
 } 

@@ -4,6 +4,7 @@ import { PersonProvider, usePersons } from "../../controllers/contexts/PersonCon
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
 import { Notification } from "../components/Notification";
+import { ProtectedRoute } from "../components/ProtectedRoute";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { useDebounce } from "../../controllers/hooks/useDebounce";
 import type { Person } from "../../domain/types/person";
@@ -20,7 +21,6 @@ function HomeContent() {
     searchPeople, 
     loadPeople,
     pagination,
-    currentSearch
   } = usePersons();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
@@ -30,9 +30,7 @@ function HomeContent() {
   const [notificationMessage, setNotificationMessage] = useState("");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const currentPage = parseInt(searchParams.get("page") || "1");
 
-  // Inicializar busca quando a página carrega com parâmetros na URL
   useEffect(() => {
     const urlSearch = searchParams.get("q");
     if (urlSearch && urlSearch !== searchTerm) {
@@ -40,21 +38,17 @@ function HomeContent() {
     }
   }, []);
 
-  // Único useEffect para gerenciar busca e paginação
   useEffect(() => {
     const urlSearch = searchParams.get("q");
     const urlPage = parseInt(searchParams.get("page") || "1");
     
-    // Se há busca na URL, usar ela
     if (urlSearch) {
       searchPeople(urlSearch, urlPage);
     } else {
-      // Se não há busca, carregar todas as pessoas
       loadPeople(urlPage);
     }
   }, [searchParams, searchPeople, loadPeople]);
 
-  // Gerenciar mudanças no campo de busca
   useEffect(() => {
     if (debouncedSearchTerm !== searchParams.get("q")) {
       const newSearchParams = new URLSearchParams(searchParams);
@@ -64,7 +58,6 @@ function HomeContent() {
         newSearchParams.set("page", "1"); // Reset apenas quando há nova busca
       } else {
         newSearchParams.delete("q");
-        // Não resetar a página quando limpa a busca
       }
       
       setSearchParams(newSearchParams);
@@ -194,8 +187,10 @@ export function meta() {
 
 export default function Home() {
   return (
-    <PersonProvider>
-      <HomeContent />
-    </PersonProvider>
+    <ProtectedRoute>
+      <PersonProvider>
+        <HomeContent />
+      </PersonProvider>
+    </ProtectedRoute>
   );
 }
