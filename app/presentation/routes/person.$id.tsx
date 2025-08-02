@@ -13,7 +13,6 @@ function UserDetailContent() {
   const { updatePerson, addPerson, isCPFUnique } = usePersons();
   const [person, setPerson] = useState<Person | undefined>(undefined);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<"success" | "error">("error");
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -28,7 +27,7 @@ function UserDetailContent() {
           const personData = await personRepository.getPersonById(id);
           setPerson(personData);
         } catch (error) {
-          setError("Pessoa não encontrada");
+          showError("Pessoa não encontrada");
         } finally {
           setLoading(false);
         }
@@ -54,12 +53,11 @@ function UserDetailContent() {
 
   const handleSubmit = async (personData: Person) => {
     setLoading(true);
-    setError(null);
     
     try {
       if (isNewUser) {
         if (!isCPFUnique(personData.cpf)) {
-          setError("CPF já cadastrado!");
+          showError("CPF já cadastrado!");
           setLoading(false);
           return;
         }
@@ -67,7 +65,7 @@ function UserDetailContent() {
         showSuccess("Pessoa cadastrada com sucesso!");
       } else {
         if (!isCPFUnique(personData.cpf, person?.id)) {
-          setError("CPF já cadastrado!");
+          showError("CPF já cadastrado!");
           setLoading(false);
           return;
         }
@@ -88,7 +86,6 @@ function UserDetailContent() {
       }
       
       showError(errorMessage);
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -109,7 +106,7 @@ function UserDetailContent() {
     );
   }
 
-  if (id && id !== "new" && !person && error) {
+  if (id && id !== "new" && !person) {
     return (
       <Layout>
         <div className="text-center py-12">
@@ -152,7 +149,6 @@ function UserDetailContent() {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
-            error={error}
             showNotification={showNotification}
             notificationType={notificationType}
             notificationMessage={notificationMessage}

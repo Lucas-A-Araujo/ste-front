@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Person } from "../../domain/types/person";
@@ -12,7 +12,6 @@ interface PersonFormProps {
   onSubmit: (data: Person) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
-  error?: string | null;
   showNotification?: boolean;
   notificationType?: "success" | "error";
   notificationMessage?: string;
@@ -24,14 +23,16 @@ export const PersonForm: React.FC<PersonFormProps> = ({
   onSubmit, 
   onCancel,
   loading = false,
-  error,
   showNotification = false,
   notificationType = "error",
   notificationMessage = "",
   onHideNotification
 }) => {
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<Person>({
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+  
+  const { register, handleSubmit, formState: { errors }, watch, setValue, setError, trigger } = useForm<Person>({
     resolver: zodResolver(PersonSchema),
+    mode: "onSubmit",
     defaultValues: person || {
       nome: "",
       sexo: "",
@@ -62,18 +63,54 @@ export const PersonForm: React.FC<PersonFormProps> = ({
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedValue = formatCPFInRealTime(e.target.value);
     setValue("cpf", formattedValue);
+    
+    if (validationErrors.cpf) {
+      setValidationErrors(prev => ({ ...prev, cpf: "" }));
+    }
+  };
+
+  const handleFieldChange = (field: keyof Person) => {
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
   const handleFormSubmit = async (data: Person) => {
+    setValidationErrors({});
+    
+    const newErrors: { [key: string]: string } = {};
+    
     const cleanCPF = data.cpf.replace(/\D/g, "");
     if (!validateCPF(cleanCPF)) {
-      throw new Error("CPF inválido!");
+      newErrors.cpf = "CPF inválido!";
+    }
+    
+    if (!data.nome?.trim()) {
+      newErrors.nome = "Nome é obrigatório";
+    }
+    
+    if (!data.dataNascimento) {
+      newErrors.dataNascimento = "Data de nascimento é obrigatória";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setValidationErrors(newErrors);
+      
+      Object.keys(newErrors).forEach(field => {
+        setError(field as keyof Person, { type: "manual", message: newErrors[field] });
+      });
+      
+      return;
     }
 
-    await onSubmit({
-      ...data,
-      cpf: cleanCPF,
-    });
+    try {
+      await onSubmit({
+        ...data,
+        cpf: cleanCPF,
+      });
+    } catch (error) {
+      console.error('Erro no formulário:', error);
+    }
   };
 
   const searchGenders = async (query: string): Promise<string[]> => {
@@ -93,21 +130,6 @@ export const PersonForm: React.FC<PersonFormProps> = ({
       />
       
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
@@ -117,10 +139,16 @@ export const PersonForm: React.FC<PersonFormProps> = ({
               {...register("nome")}
               type="text"
               id="nome"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              onChange={(e) => {
+                register("nome").onChange(e);
+                handleFieldChange("nome");
+              }}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
+                errors.nome ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
-            {errors.nome && (
-              <p className="mt-1 text-sm text-red-600">{errors.nome.message}</p>
+            {(errors.nome || validationErrors.nome) && (
+              <p className="mt-1 text-sm text-red-600">{errors.nome?.message || validationErrors.nome}</p>
             )}
           </div>
 
@@ -135,10 +163,14 @@ export const PersonForm: React.FC<PersonFormProps> = ({
               placeholder="000.000.000-00"
               maxLength={14}
               onChange={handleCPFChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
+                errors.cpf || validationErrors.cpf ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
-            {errors.cpf && (
-              <p className="mt-1 text-sm text-red-600">{errors.cpf.message}</p>
+            {(errors.cpf || validationErrors.cpf) && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.cpf?.message || validationErrors.cpf}
+              </p>
             )}
           </div>
 
@@ -150,10 +182,16 @@ export const PersonForm: React.FC<PersonFormProps> = ({
               {...register("email")}
               type="email"
               id="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              onChange={(e) => {
+                register("email").onChange(e);
+                handleFieldChange("email");
+              }}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
+                errors.email ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            {(errors.email || validationErrors.email) && (
+              <p className="mt-1 text-sm text-red-600">{errors.email?.message || validationErrors.email}</p>
             )}
           </div>
 
@@ -165,10 +203,16 @@ export const PersonForm: React.FC<PersonFormProps> = ({
               {...register("dataNascimento")}
               type="date"
               id="dataNascimento"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              onChange={(e) => {
+                register("dataNascimento").onChange(e);
+                handleFieldChange("dataNascimento");
+              }}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
+                errors.dataNascimento ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
-            {errors.dataNascimento && (
-              <p className="mt-1 text-sm text-red-600">{errors.dataNascimento.message}</p>
+            {(errors.dataNascimento || validationErrors.dataNascimento) && (
+              <p className="mt-1 text-sm text-red-600">{errors.dataNascimento?.message || validationErrors.dataNascimento}</p>
             )}
           </div>
 
@@ -176,27 +220,39 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             label="Sexo"
             placeholder="Digite para buscar..."
             value={watch("sexo") || ""}
-            onChange={(value) => setValue("sexo", value)}
+            onChange={(value) => {
+              setValue("sexo", value);
+              handleFieldChange("sexo");
+            }}
             onSearch={searchGenders}
             debounceDelay={100}
+            error={validationErrors.sexo}
           />
 
           <AutocompleteInput
             label="Naturalidade"
             placeholder="Digite para buscar..."
             value={watch("naturalidade") || ""}
-            onChange={(value) => setValue("naturalidade", value)}
+            onChange={(value) => {
+              setValue("naturalidade", value);
+              handleFieldChange("naturalidade");
+            }}
             onSearch={referenceRepository.searchBirthplaces}
             debounceDelay={300}
+            error={validationErrors.naturalidade}
           />
 
           <AutocompleteInput
             label="Nacionalidade"
             placeholder="Digite para buscar..."
             value={watch("nacionalidade") || ""}
-            onChange={(value) => setValue("nacionalidade", value)}
+            onChange={(value) => {
+              setValue("nacionalidade", value);
+              handleFieldChange("nacionalidade");
+            }}
             onSearch={referenceRepository.searchNationalities}
             debounceDelay={300}
+            error={validationErrors.nacionalidade}
           />
         </div>
 

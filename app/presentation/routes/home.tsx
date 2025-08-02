@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
-import { FaSearch, FaPlus, FaExclamationTriangle } from "react-icons/fa";
+import { Notification } from "../components/Notification";
+import { FaSearch, FaPlus } from "react-icons/fa";
 import { useDebounce } from "../../controllers/hooks/useDebounce";
 import type { Person } from "../../domain/types/person";
 
@@ -13,6 +14,9 @@ function HomeContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationType, setNotificationType] = useState<"success" | "error">("error");
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -21,6 +25,26 @@ function HomeContent() {
       searchPeople(debouncedSearchTerm);
     }
   }, [debouncedSearchTerm, searchPeople, hasSearched]);
+
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+  }, [error]);
+
+  const showError = (message: string) => {
+    setNotificationType("error");
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 5000);
+  };
+
+  const showSuccess = (message: string) => {
+    setNotificationType("success");
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
 
   const handleEdit = (person: Person) => {
     navigate(`/person/${person.id}`);
@@ -31,9 +55,10 @@ function HomeContent() {
       setDeletingId(id);
       try {
         await deletePerson(id);
+        showSuccess("Pessoa excluída com sucesso!");
       } catch (error) {
         console.error('Erro ao excluir pessoa:', error);
-        alert('Erro ao excluir pessoa. Tente novamente.');
+        showError('Erro ao excluir pessoa. Tente novamente.');
       } finally {
         setDeletingId(null);
       }
@@ -51,31 +76,19 @@ function HomeContent() {
 
   return (
     <Layout>
+      <Notification
+        type={notificationType}
+        message={notificationMessage}
+        onClose={() => setShowNotification(false)}
+        show={showNotification}
+      />
+      
       <div className="space-y-6">
         <div>
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Pessoas</h2>
             <p className="text-gray-600">Gerencie as pessoas do sistema</p>
           </div>
-          
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <FaExclamationTriangle className="h-5 w-5 text-red-400" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
-                  <button
-                    onClick={refreshPersons}
-                    className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
-                  >
-                    Tentar novamente
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           
           <div className="flex justify-between items-center">
             <div className="flex-1 max-w-md">
