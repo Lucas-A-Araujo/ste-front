@@ -104,10 +104,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
     }
 
     try {
-      await onSubmit({
-        ...data,
-        cpf: cleanCPF,
-      });
+      await onSubmit(data); 
     } catch (error) {
       console.error('Erro no formulário:', error);
     }

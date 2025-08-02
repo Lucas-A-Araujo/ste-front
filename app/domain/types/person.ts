@@ -41,7 +41,7 @@ export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
     dataNascimento: apiPerson.birthDate.split('T')[0], 
     naturalidade: apiPerson.naturalness || "",
     nacionalidade: apiPerson.nationality || "",
-    cpf: apiPerson.cpf,
+    cpf: formatCPF(apiPerson.cpf), 
   };
 };
 
@@ -53,7 +53,7 @@ export const mapPersonToAPIPerson = (person: Person): Omit<APIPerson, 'id' | 'cr
     birthDate: person.dataNascimento,
     naturalness: person.naturalidade || null,
     nationality: person.nacionalidade || null,
-    cpf: person.cpf,
+    cpf: person.cpf, 
   };
 };
 
