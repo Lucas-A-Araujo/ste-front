@@ -1,53 +1,89 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
-import { FaSearch, FaPlus } from "react-icons/fa";
+import { FaSearch, FaPlus, FaExclamationTriangle } from "react-icons/fa";
+import { useDebounce } from "../hooks/useDebounce";
 import type { Person } from "../types/person";
 
 function HomeContent() {
   const navigate = useNavigate();
-  const { persons, deletePerson } = usePersons();
+  const { persons, deletePerson, loading, error, searchLoading, searchPeople, refreshPersons } = usePersons();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const filteredUsers = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return persons;
-    }
-    
-    const term = searchTerm.toLowerCase();
-    return persons.filter(person => 
-      person.nome.toLowerCase().includes(term) ||
-      person.cpf.includes(term) ||
-      (person.email && person.email.toLowerCase().includes(term)) ||
-      (person.naturalidade && person.naturalidade.toLowerCase().includes(term)) ||
-      (person.nacionalidade && person.nacionalidade.toLowerCase().includes(term))
-    );
-  }, [persons, searchTerm]);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  React.useEffect(() => {
+    searchPeople(debouncedSearchTerm);
+  }, [debouncedSearchTerm, searchPeople]);
 
   const handleEdit = (person: Person) => {
     navigate(`/person/${person.id}`);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este pessoa?")) {
-      deletePerson(id);
+  const handleDelete = async (id: string) => {
+    if (confirm("Tem certeza que deseja excluir esta pessoa?")) {
+      setDeletingId(id);
+      try {
+        await deletePerson(id);
+      } catch (error) {
+        console.error('Erro ao excluir pessoa:', error);
+        alert('Erro ao excluir pessoa. Tente novamente.');
+      } finally {
+        setDeletingId(null);
+      }
     }
   };
 
   const handleNewUser = () => {
-    navigate("/user/new");
+    navigate("/person/new");
   };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  if (loading && persons.length === 0) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando pessoas...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="space-y-6">
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">pessoas</h2>
-            <p className="text-gray-600">Gerencie os pessoas do sistema</p>
+            <h2 className="text-2xl font-bold text-gray-900">Pessoas</h2>
+            <p className="text-gray-600">Gerencie as pessoas do sistema</p>
           </div>
+          
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <FaExclamationTriangle className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{error}</p>
+                  <button
+                    onClick={refreshPersons}
+                    className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
+                  >
+                    Tentar novamente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex justify-between items-center">
             <div className="flex-1 max-w-md">
               <div className="relative">
@@ -58,9 +94,14 @@ function HomeContent() {
                   type="text"
                   placeholder="Buscar pessoas..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
                 />
+                {searchLoading && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -75,9 +116,10 @@ function HomeContent() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <PersonList
-            persons={filteredUsers}
+            persons={persons}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            deletingId={deletingId}
           />
         </div>
       </div>
