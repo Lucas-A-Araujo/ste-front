@@ -45,7 +45,7 @@ interface PersonProviderProps {
 export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   const [persons, setPersons] = useState<Person[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [pagination, setPagination] = useState<{
     page: number;
     limit: number;
@@ -56,6 +56,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   } | null>(null);
   const [currentSearch, setCurrentSearch] = useState("");
   const { loading, error, execute } = useApi<PaginatedResponse<Person>>();
+  const { execute: executePerson } = useApi<Person>();
 
   const loadPeople = useCallback(async (page: number = 1) => {
     try {
@@ -117,13 +118,9 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     }
   }, [execute, loadPeople]);
 
-  useEffect(() => {
-    loadPeople();
-  }, [loadPeople]);
-
   const addPerson = useCallback(async (person: Omit<Person, 'id'>) => {
     try {
-      const newPerson = await personRepository.createPerson(person);
+      const newPerson = await executePerson(() => personRepository.createPerson(person));
       setPersons(prev => [...prev, newPerson]);
       // Atualizar contagem total
       if (pagination) {
@@ -132,11 +129,11 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     } catch (error) {
       throw error;
     }
-  }, [pagination]);
+  }, [pagination, executePerson]);
 
   const updatePerson = useCallback(async (id: string, updatedPerson: Omit<Person, 'id'>) => {
     try {
-      const updated = await personRepository.updatePerson(id, updatedPerson);
+      const updated = await executePerson(() => personRepository.updatePerson(id, updatedPerson));
       setPersons(prev => 
         prev.map(person => 
           person.id === id ? updated : person
@@ -145,11 +142,11 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     } catch (error) {
       throw error;
     }
-  }, []);
+  }, [executePerson]);
 
   const deletePerson = useCallback(async (id: string) => {
     try {
-      await personRepository.deletePerson(id);
+      await executePerson(() => personRepository.deletePerson(id));
       setPersons(prev => prev.filter(person => person.id !== id));
       // Atualizar contagem total
       if (pagination) {
@@ -158,7 +155,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     } catch (error) {
       throw error;
     }
-  }, [pagination]);
+  }, [pagination, executePerson]);
 
   const getPersonById = useCallback((id: string) => {
     return persons.find(person => person.id === id);

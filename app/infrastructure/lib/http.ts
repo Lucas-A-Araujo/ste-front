@@ -31,6 +31,14 @@ class HttpClient {
   private setupInterceptors() {
     this.client.interceptors.request.use(
       (config) => {
+        // Adicionar token de autenticação se disponível
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log('Token adicionado à requisição:', token.substring(0, 20) + '...');
+        } else {
+          console.log('Nenhum token encontrado no localStorage');
+        }
         return config;
       },
       (error) => {
@@ -45,6 +53,15 @@ class HttpClient {
       (error: AxiosError) => {
         if (error.response) {
           const errorData = error.response.data as APIErrorResponse;
+          
+          // Se receber 401 (Unauthorized), limpar token e redirecionar para login
+          if (error.response.status === 401) {
+            console.log('Erro 401 - Token inválido, redirecionando para login');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            window.location.href = '/login';
+          }
+          
           throw new HttpError(
             errorData.statusCode,
             errorData.error,

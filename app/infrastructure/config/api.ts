@@ -3,6 +3,7 @@ export const API_CONFIG = {
   VERSION: 'v1',
   TIMEOUT: 10000,
   ENDPOINTS: {
+    AUTH: '/auth/login',
     PEOPLE: '/people',
     NATIONALITIES: '/reference/nationalities',
     BIRTHPLACES: '/reference/birthplaces',
