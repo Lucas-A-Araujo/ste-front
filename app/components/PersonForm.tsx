@@ -24,20 +24,28 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
     },
   });
 
-  const watchedCPF = watch("cpf");
-
-  // Formatação automática do CPF
-  React.useEffect(() => {
-    if (watchedCPF) {
-      const formatted = formatCPF(watchedCPF);
-      if (formatted !== watchedCPF) {
-        setValue("cpf", formatted);
-      }
+  const formatCPFInRealTime = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    
+    const limitedNumbers = numbers.slice(0, 11);
+    
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers;
+    } else if (limitedNumbers.length <= 6) {
+      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3)}`;
+    } else if (limitedNumbers.length <= 9) {
+      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3, 6)}.${limitedNumbers.slice(6)}`;
+    } else {
+      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3, 6)}.${limitedNumbers.slice(6, 9)}-${limitedNumbers.slice(9)}`;
     }
-  }, [watchedCPF, setValue]);
+  };
+
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCPFInRealTime(e.target.value);
+    setValue("cpf", formattedValue);
+  };
 
   const handleFormSubmit = (data: Person) => {
-    // Validação adicional do CPF
     const cleanCPF = data.cpf.replace(/\D/g, "");
     if (!validateCPF(cleanCPF)) {
       alert("CPF inválido!");
@@ -55,7 +63,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
-            Nome *
+            Nome (obrigatório)
           </label>
           <input
             {...register("nome")}
@@ -70,13 +78,15 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
 
         <div>
           <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
-            CPF *
+            CPF (obrigatório)
           </label>
           <input
             {...register("cpf")}
             type="text"
             id="cpf"
             placeholder="000.000.000-00"
+            maxLength={14}
+            onChange={handleCPFChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
           />
           {errors.cpf && (
@@ -101,7 +111,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
 
         <div>
           <label htmlFor="dataNascimento" className="block text-sm font-medium text-gray-700 mb-1">
-            Data de Nascimento *
+            Data de Nascimento (obrigatório)
           </label>
           <input
             {...register("dataNascimento")}
