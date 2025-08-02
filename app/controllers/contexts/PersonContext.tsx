@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { Person } from "../../domain/types/person";
+import type { Person, PaginatedResponse, PaginationParams } from "../../domain/types/person";
 import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { useApi } from "../hooks/useApi";
 
@@ -9,10 +9,20 @@ interface PersonContextType {
   loading: boolean;
   searchLoading: boolean;
   error: string | null;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasPrevious: boolean;
+    hasNext: boolean;
+  } | null;
+  currentSearch: string;
   addPerson: (person: Omit<Person, 'id'>) => Promise<void>;
   updatePerson: (id: string, person: Omit<Person, 'id'>) => Promise<void>;
   deletePerson: (id: string) => Promise<void>;
-  searchPeople: (query: string) => Promise<void>;
+  searchPeople: (query: string, page?: number) => Promise<void>;
+  loadPeople: (page?: number) => Promise<void>;
   getPersonById: (id: string) => Person | undefined;
   isCPFUnique: (cpf: string, excludeId?: string) => boolean;
   refreshPersons: () => Promise<void>;
@@ -36,12 +46,35 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   const [persons, setPersons] = useState<Person[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const { loading, error, execute } = useApi<Person[]>();
+  const [pagination, setPagination] = useState<{
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasPrevious: boolean;
+    hasNext: boolean;
+  } | null>(null);
+  const [currentSearch, setCurrentSearch] = useState("");
+  const { loading, error, execute } = useApi<PaginatedResponse<Person>>();
 
-  const loadPersons = useCallback(async () => {
+  const loadPeople = useCallback(async (page: number = 1) => {
     try {
-      const data = await execute(() => personRepository.getPeople());
-      setPersons(data);
+      const params: PaginationParams = {
+        page,
+        limit: 10, // Itens por página
+        search: undefined // Sempre carregar todas as pessoas
+      };
+      
+      const data = await execute(() => personRepository.getPeople(params));
+      setPersons(data.data);
+      setPagination({
+        page: data.page,
+        limit: data.limit,
+        total: data.total,
+        totalPages: data.totalPages,
+        hasPrevious: data.hasPrevious,
+        hasNext: data.hasNext
+      });
     } catch (error) {
       console.error('Erro ao carregar pessoas:', error);
     } finally {
@@ -49,36 +82,57 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     }
   }, [execute]);
 
-  const searchPeople = useCallback(async (query: string) => {
+  const searchPeople = useCallback(async (query: string, page: number = 1) => {
+    setCurrentSearch(query);
+    
     if (!query.trim()) {
-      await loadPersons();
+      setCurrentSearch("");
+      await loadPeople(page);
       return;
     }
 
     setSearchLoading(true);
     try {
-      const data = await personRepository.searchPeople(query);
-      setPersons(data);
+      const params: PaginationParams = {
+        page,
+        limit: 10,
+        search: query
+      };
+      
+      const data = await execute(() => personRepository.searchPeople(query, params));
+      setPersons(data.data);
+      setPagination({
+        page: data.page,
+        limit: data.limit,
+        total: data.total,
+        totalPages: data.totalPages,
+        hasPrevious: data.hasPrevious,
+        hasNext: data.hasNext
+      });
     } catch (error) {
       console.error('Erro ao buscar pessoas:', error);
-      await loadPersons();
+      await loadPeople(page);
     } finally {
       setSearchLoading(false);
     }
-  }, [loadPersons]);
+  }, [execute, loadPeople]);
 
   useEffect(() => {
-    loadPersons();
-  }, [loadPersons]);
+    loadPeople();
+  }, [loadPeople]);
 
   const addPerson = useCallback(async (person: Omit<Person, 'id'>) => {
     try {
       const newPerson = await personRepository.createPerson(person);
       setPersons(prev => [...prev, newPerson]);
+      // Atualizar contagem total
+      if (pagination) {
+        setPagination(prev => prev ? { ...prev, total: prev.total + 1 } : null);
+      }
     } catch (error) {
       throw error;
     }
-  }, []);
+  }, [pagination]);
 
   const updatePerson = useCallback(async (id: string, updatedPerson: Omit<Person, 'id'>) => {
     try {
@@ -97,10 +151,14 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     try {
       await personRepository.deletePerson(id);
       setPersons(prev => prev.filter(person => person.id !== id));
+      // Atualizar contagem total
+      if (pagination) {
+        setPagination(prev => prev ? { ...prev, total: prev.total - 1 } : null);
+      }
     } catch (error) {
       throw error;
     }
-  }, []);
+  }, [pagination]);
 
   const getPersonById = useCallback((id: string) => {
     return persons.find(person => person.id === id);
@@ -113,18 +171,25 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   }, [persons]);
 
   const refreshPersons = useCallback(async () => {
-    await loadPersons();
-  }, [loadPersons]);
+    if (currentSearch) {
+      await searchPeople(currentSearch, pagination?.page || 1);
+    } else {
+      await loadPeople(pagination?.page || 1);
+    }
+  }, [currentSearch, pagination?.page, searchPeople, loadPeople]);
 
   const value: PersonContextType = {
     persons,
     loading: loading || initialLoading,
     searchLoading,
     error,
+    pagination,
+    currentSearch,
     addPerson,
     updatePerson,
     deletePerson,
     searchPeople,
+    loadPeople,
     getPersonById,
     isCPFUnique,
     refreshPersons,

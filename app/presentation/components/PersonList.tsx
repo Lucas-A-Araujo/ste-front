@@ -1,6 +1,7 @@
 import React from "react";
 import type { Person } from "../../domain/types/person";
 import { formatCPF, formatDate } from "../../domain/types/person";
+import { Pagination } from "./Pagination";
 import noDataSvg from "../../../assets/undraw_no-data_ig65.svg";
 
 interface PersonListProps {
@@ -9,6 +10,15 @@ interface PersonListProps {
   onDelete: (id: string) => void;
   deletingId?: string | null;
   loading?: boolean;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasPrevious: boolean;
+    hasNext: boolean;
+  } | null;
+  onPageChange?: (page: number) => void;
 }
 
 export const PersonList: React.FC<PersonListProps> = ({ 
@@ -16,7 +26,9 @@ export const PersonList: React.FC<PersonListProps> = ({
   onEdit, 
   onDelete, 
   deletingId,
-  loading = false 
+  loading = false,
+  pagination,
+  onPageChange
 }) => {
   if (loading) {
     return (
@@ -110,6 +122,20 @@ export const PersonList: React.FC<PersonListProps> = ({
           </tbody>
         </table>
       </div>
+      
+      {pagination && onPageChange && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.limit}
+            hasPrevious={pagination.hasPrevious}
+            hasNext={pagination.hasNext}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }; 

@@ -3,12 +3,17 @@ import { z } from "zod";
 export const PersonSchema = z.object({
   id: z.string().optional(),
   nome: z.string().min(1, "Nome é obrigatório"),
-  sexo: z.string().optional(),
-  email: z.string().email("E-mail inválido").optional().or(z.literal("")),
+  sexo: z.string().nullable().optional(),
+  email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
   dataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
-  naturalidade: z.string().optional(),
-  nacionalidade: z.string().optional(),
-  cpf: z.string().min(1, "CPF é obrigatório"),
+  naturalidade: z.string().nullable().optional(),
+  nacionalidade: z.string().nullable().optional(),
+  cpf: z.string().min(1, "CPF é obrigatório").refine((cpf) => {
+    const cleanCPF = cpf.replace(/\D/g, "");
+    if (cleanCPF.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
+    return true;
+  }, "CPF inválido"),
 });
 
 export type Person = z.infer<typeof PersonSchema>;
@@ -16,13 +21,13 @@ export type Person = z.infer<typeof PersonSchema>;
 export interface APIPerson {
   id: number;
   name: string;
-  gender: string;
-  email: string;
+  gender?: string | null;
+  email?: string | null;
   birthDate: string;
-  naturalness: string;
-  nationality: string;
+  naturalness?: string | null;
+  nationality?: string | null;
   cpf: string;
-  address?: string;
+  address?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -31,7 +36,7 @@ export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
   return {
     id: apiPerson.id.toString(),
     nome: apiPerson.name,
-    sexo: apiPerson.gender, 
+    sexo: apiPerson.gender || "", 
     email: apiPerson.email || "",
     dataNascimento: apiPerson.birthDate.split('T')[0], 
     naturalidade: apiPerson.naturalness || "",
@@ -43,11 +48,11 @@ export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
 export const mapPersonToAPIPerson = (person: Person): Omit<APIPerson, 'id' | 'createdAt' | 'updatedAt'> => {
   return {
     name: person.nome,
-    gender: person.sexo || "",
-    email: person.email || "",
+    gender: person.sexo || null,
+    email: person.email || null,
     birthDate: person.dataNascimento,
-    naturalness: person.naturalidade || "",
-    nationality: person.nacionalidade || "",
+    naturalness: person.naturalidade || null,
+    nationality: person.nacionalidade || null,
     cpf: person.cpf,
   };
 };
@@ -59,32 +64,43 @@ export const validateCPF = (cpf: string): boolean => {
   
   if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
   
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
-  }
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cleanCPF.charAt(9))) return false;
-  
-  sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cleanCPF.charAt(10))) return false;
-  
   return true;
 };
 
 export const formatCPF = (cpf: string): string => {
   const cleanCPF = cpf.replace(/\D/g, "");
-  return cleanCPF.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  
+  // Aplica formatação progressiva conforme o usuário digita
+  if (cleanCPF.length <= 3) {
+    return cleanCPF;
+  } else if (cleanCPF.length <= 6) {
+    return `${cleanCPF.slice(0, 3)}.${cleanCPF.slice(3)}`;
+  } else if (cleanCPF.length <= 9) {
+    return `${cleanCPF.slice(0, 3)}.${cleanCPF.slice(3, 6)}.${cleanCPF.slice(6)}`;
+  } else {
+    return `${cleanCPF.slice(0, 3)}.${cleanCPF.slice(3, 6)}.${cleanCPF.slice(6, 9)}-${cleanCPF.slice(9, 11)}`;
+  }
 };
 
 export const formatDate = (date: string): string => {
   if (!date) return "";
   const [year, month, day] = date.split("-");
   return `${day}/${month}/${year}`;
-}; 
+};
+
+// Tipos para paginação - estrutura correta da API
+export interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+} 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
@@ -10,21 +10,66 @@ import type { Person } from "../../domain/types/person";
 
 function HomeContent() {
   const navigate = useNavigate();
-  const { persons, deletePerson, loading, error, searchLoading, searchPeople, refreshPersons } = usePersons();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { 
+    persons, 
+    deletePerson, 
+    loading, 
+    error, 
+    searchLoading, 
+    searchPeople, 
+    loadPeople,
+    pagination,
+    currentSearch
+  } = usePersons();
+  
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<"success" | "error">("error");
   const [notificationMessage, setNotificationMessage] = useState("");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const currentPage = parseInt(searchParams.get("page") || "1");
 
+  // Inicializar busca quando a página carrega com parâmetros na URL
   useEffect(() => {
-    if (hasSearched || searchTerm) {
-      searchPeople(debouncedSearchTerm);
+    const urlSearch = searchParams.get("q");
+    if (urlSearch && urlSearch !== searchTerm) {
+      setSearchTerm(urlSearch);
     }
-  }, [debouncedSearchTerm, searchPeople, hasSearched]);
+  }, []);
+
+  // Único useEffect para gerenciar busca e paginação
+  useEffect(() => {
+    const urlSearch = searchParams.get("q");
+    const urlPage = parseInt(searchParams.get("page") || "1");
+    
+    // Se há busca na URL, usar ela
+    if (urlSearch) {
+      searchPeople(urlSearch, urlPage);
+    } else {
+      // Se não há busca, carregar todas as pessoas
+      loadPeople(urlPage);
+    }
+  }, [searchParams, searchPeople, loadPeople]);
+
+  // Gerenciar mudanças no campo de busca
+  useEffect(() => {
+    if (debouncedSearchTerm !== searchParams.get("q")) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      
+      if (debouncedSearchTerm) {
+        newSearchParams.set("q", debouncedSearchTerm);
+        newSearchParams.set("page", "1"); // Reset apenas quando há nova busca
+      } else {
+        newSearchParams.delete("q");
+        // Não resetar a página quando limpa a busca
+      }
+      
+      setSearchParams(newSearchParams);
+    }
+  }, [debouncedSearchTerm, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (error) {
@@ -42,7 +87,6 @@ function HomeContent() {
   const showSuccess = (message: string) => {
     setNotificationType("success");
     setNotificationMessage(message);
-    setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000);
   };
 
@@ -71,7 +115,12 @@ function HomeContent() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setHasSearched(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("page", page.toString());
+    setSearchParams(newSearchParams);
   };
 
   return (
@@ -127,6 +176,8 @@ function HomeContent() {
             onDelete={handleDelete}
             deletingId={deletingId}
             loading={loading}
+            pagination={pagination}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>
