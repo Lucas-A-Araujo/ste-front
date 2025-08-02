@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
-import type { APIErrorResponse } from '../types/api';
+import type { APIErrorResponse } from '../../domain/types/api';
 import { API_CONFIG } from '../config/api';
 
 export class HttpError extends Error {
