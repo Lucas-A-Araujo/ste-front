@@ -3,7 +3,7 @@ import { z } from "zod";
 export const PersonSchema = z.object({
   id: z.string().optional(),
   nome: z.string().min(1, "Nome é obrigatório"),
-  sexo: z.enum(["M", "F", ""]).optional(),
+  sexo: z.string().optional(),
   email: z.string().email("E-mail inválido").optional().or(z.literal("")),
   dataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
   naturalidade: z.string().optional(),
@@ -12,6 +12,45 @@ export const PersonSchema = z.object({
 });
 
 export type Person = z.infer<typeof PersonSchema>;
+
+export interface APIPerson {
+  id: number;
+  name: string;
+  gender: string;
+  email: string;
+  birthDate: string;
+  naturalness: string;
+  nationality: string;
+  cpf: string;
+  address?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
+  return {
+    id: apiPerson.id.toString(),
+    nome: apiPerson.name,
+    sexo: apiPerson.gender, 
+    email: apiPerson.email || "",
+    dataNascimento: apiPerson.birthDate.split('T')[0], 
+    naturalidade: apiPerson.naturalness || "",
+    nacionalidade: apiPerson.nationality || "",
+    cpf: apiPerson.cpf,
+  };
+};
+
+export const mapPersonToAPIPerson = (person: Person): Omit<APIPerson, 'id' | 'createdAt' | 'updatedAt'> => {
+  return {
+    name: person.nome,
+    gender: person.sexo || "", // Mantém o valor original do frontend
+    email: person.email || "",
+    birthDate: person.dataNascimento,
+    naturalness: person.naturalidade || "",
+    nationality: person.nacionalidade || "",
+    cpf: person.cpf,
+  };
+};
 
 export const validateCPF = (cpf: string): boolean => {
   const cleanCPF = cpf.replace(/\D/g, "");
