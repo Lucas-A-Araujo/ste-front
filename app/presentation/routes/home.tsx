@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { PersonProvider, usePersons } from "../contexts/PersonContext";
+import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
 import { FaSearch, FaPlus, FaExclamationTriangle } from "react-icons/fa";
-import { useDebounce } from "../hooks/useDebounce";
-import type { Person } from "../types/person";
+import { useDebounce } from "../../controllers/hooks/useDebounce";
+import type { Person } from "../../domain/types/person";
 
 function HomeContent() {
   const navigate = useNavigate();

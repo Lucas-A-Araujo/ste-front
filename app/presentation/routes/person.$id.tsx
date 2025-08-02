@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { PersonProvider, usePersons } from "../contexts/PersonContext";
+import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
 import { PersonForm } from "../components/PersonForm";
 import { Layout } from "../components/Layout";
-import { personService } from "../services/personService";
-import type { Person } from "../types/person";
+import { personService } from "../../infrastructure/services/personService";
+import { HttpError } from "../../infrastructure/lib/http";
+import type { Person } from "../../domain/types/person";
 
 function UserDetailContent() {
   const { id } = useParams();
@@ -13,6 +14,9 @@ function UserDetailContent() {
   const [person, setPerson] = useState<Person | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationType, setNotificationType] = useState<"success" | "error">("error");
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   const isNewUser = id === "new";
 
@@ -34,27 +38,59 @@ function UserDetailContent() {
     loadPerson();
   }, [id]);
 
+  const showSuccess = (message: string) => {
+    setNotificationType("success");
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
+  const showError = (message: string) => {
+    setNotificationType("error");
+    setNotificationMessage(message);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 5000);
+  };
+
   const handleSubmit = async (personData: Person) => {
+    setLoading(true);
+    setError(null);
+    
     try {
       if (isNewUser) {
         if (!isCPFUnique(personData.cpf)) {
           setError("CPF já cadastrado!");
+          setLoading(false);
           return;
         }
         await addPerson(personData);
+        showSuccess("Pessoa cadastrada com sucesso!");
       } else {
         if (!isCPFUnique(personData.cpf, person?.id)) {
           setError("CPF já cadastrado!");
+          setLoading(false);
           return;
         }
 
         if (person?.id) {
           await updatePerson(person.id, personData);
+          showSuccess("Pessoa atualizada com sucesso!");
         }
       }
       navigate("/");
     } catch (error) {
-      throw error;
+      let errorMessage = 'Erro desconhecido';
+      
+      if (error instanceof HttpError) {
+        errorMessage = error.messages.join(', ');
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      showError(errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,7 +98,7 @@ function UserDetailContent() {
     navigate("/");
   };
 
-  if (loading) {
+  if (loading && !person) {
     return (
       <Layout>
         <div className="text-center py-12">
@@ -115,6 +151,12 @@ function UserDetailContent() {
             person={person}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
+            loading={loading}
+            error={error}
+            showNotification={showNotification}
+            notificationType={notificationType}
+            notificationMessage={notificationMessage}
+            onHideNotification={() => setShowNotification(false)}
           />
         </div>
       </div>
