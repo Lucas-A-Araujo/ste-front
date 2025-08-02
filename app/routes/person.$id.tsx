@@ -1,56 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { PersonProvider, usePersons } from "../contexts/PersonContext";
 import { PersonForm } from "../components/PersonForm";
 import { Layout } from "../components/Layout";
+import { personService } from "../services/personService";
 import type { Person } from "../types/person";
 
 function UserDetailContent() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getPersonById, updatePerson, addPerson, isCPFUnique } = usePersons();
-  const [person, setPerson] = useState<Person | undefined>(() => {
-    if (id && id !== "new") {
-      return getPersonById(id);
-    }
-    return undefined;
-  });
+  const { updatePerson, addPerson, isCPFUnique } = usePersons();
+  const [person, setPerson] = useState<Person | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isNewUser = id === "new";
 
-  const handleSubmit = (personData: Person) => {
-    if (isNewUser) {
-      // Verifica unicidade do CPF para novo pessoa
-      if (!isCPFUnique(personData.cpf)) {
-        alert("CPF já cadastrado!");
-        return;
+  useEffect(() => {
+    const loadPerson = async () => {
+      if (id && id !== "new") {
+        setLoading(true);
+        try {
+          const personData = await personService.getPersonById(id);
+          setPerson(personData);
+        } catch (error) {
+          setError("Pessoa não encontrada");
+        } finally {
+          setLoading(false);
+        }
       }
-      addPerson(personData);
-    } else {
-      // Verifica unicidade do CPF (excluindo o pessoa atual)
-      if (!isCPFUnique(personData.cpf, person?.id)) {
-        alert("CPF já cadastrado!");
-        return;
-      }
+    };
 
-      if (person?.id) {
-        updatePerson(person.id, personData);
+    loadPerson();
+  }, [id]);
+
+  const handleSubmit = async (personData: Person) => {
+    try {
+      if (isNewUser) {
+        if (!isCPFUnique(personData.cpf)) {
+          setError("CPF já cadastrado!");
+          return;
+        }
+        await addPerson(personData);
+      } else {
+        if (!isCPFUnique(personData.cpf, person?.id)) {
+          setError("CPF já cadastrado!");
+          return;
+        }
+
+        if (person?.id) {
+          await updatePerson(person.id, personData);
+        }
       }
+      navigate("/");
+    } catch (error) {
+      throw error;
     }
-    navigate("/");
   };
 
   const handleCancel = () => {
     navigate("/");
   };
 
-  // Se não encontrou o pessoa e não é um novo pessoa
-  if (id && id !== "new" && !person) {
+  if (loading) {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">pessoa não encontrado</h2>
-          <p className="text-gray-600 mb-6">O pessoa que você está procurando não existe.</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (id && id !== "new" && !person && error) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Pessoa não encontrada</h2>
+          <p className="text-gray-600 mb-6">A pessoa que você está procurando não existe.</p>
           <button
             onClick={() => navigate("/")}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary"
@@ -68,10 +96,10 @@ function UserDetailContent() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {isNewUser ? "Novo pessoa" : "Editar pessoa"}
+              {isNewUser ? "Nova pessoa" : "Editar pessoa"}
             </h2>
             <p className="text-gray-600">
-              {isNewUser ? "Cadastre um novo pessoa no sistema" : "Atualize as informações do pessoa"}
+              {isNewUser ? "Cadastre uma nova pessoa no sistema" : "Atualize as informações da pessoa"}
             </p>
           </div>
           <button
@@ -96,7 +124,7 @@ function UserDetailContent() {
 
 export function meta() {
   return [
-    { title: "Detalhes do pessoa" },
+    { title: "Detalhes da pessoa" },
     { name: "description", content: "Detalhes e edição de pessoa" },
   ];
 }
