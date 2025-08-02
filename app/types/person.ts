@@ -43,7 +43,7 @@ export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
 export const mapPersonToAPIPerson = (person: Person): Omit<APIPerson, 'id' | 'createdAt' | 'updatedAt'> => {
   return {
     name: person.nome,
-    gender: person.sexo || "", // Mantém o valor original do frontend
+    gender: person.sexo || "",
     email: person.email || "",
     birthDate: person.dataNascimento,
     naturalness: person.naturalidade || "",
