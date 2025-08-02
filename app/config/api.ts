@@ -7,8 +7,4 @@ export const API_CONFIG = {
     NATIONALITIES: '/reference/nationalities',
     BIRTHPLACES: '/reference/birthplaces',
   },
-} as const;
-
-export const getApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}/${API_CONFIG.VERSION}${endpoint}`;
-}; 
+} as const; 
