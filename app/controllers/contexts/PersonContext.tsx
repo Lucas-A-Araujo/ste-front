@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { Person } from "../types/person";
-import { personService } from "../services/personService";
+import type { Person } from "../../domain/types/person";
+import { personService } from "../../infrastructure/services/personService";
 import { useApi } from "../hooks/useApi";
 
 interface PersonContextType {

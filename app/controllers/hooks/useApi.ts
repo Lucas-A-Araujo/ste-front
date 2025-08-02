@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { HttpError } from '../lib/http';
+import { HttpError } from '../../infrastructure/lib/http';
 
 export interface ApiState<T> {
   data: T | null;
