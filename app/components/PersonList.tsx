@@ -7,9 +7,10 @@ interface PersonListProps {
   persons: Person[];
   onEdit: (person: Person) => void;
   onDelete: (id: string) => void;
+  deletingId?: string | null;
 }
 
-export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelete }) => {
+export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelete, deletingId }) => {
   if (persons.length === 0) {
     return (
       <div className="text-center py-12">
@@ -69,21 +70,23 @@ export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelet
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {person.sexo === "M" ? "Masculino" : person.sexo === "F" ? "Feminino" : "-"}
+                    {person.sexo || "-"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => onEdit(person)}
-                    className="text-primary hover:text-primary-hover mr-4"
+                    disabled={deletingId === person.id}
+                    className="text-primary hover:text-primary-hover mr-4 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => onDelete(person.id!)}
-                    className="text-red-600 hover:text-red-900"
+                    disabled={deletingId === person.id}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Excluir
+                    {deletingId === person.id ? "Excluindo..." : "Excluir"}
                   </button>
                 </td>
               </tr>
