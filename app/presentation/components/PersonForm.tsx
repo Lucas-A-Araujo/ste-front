@@ -1,26 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Person } from "../types/person";
-import { PersonSchema, validateCPF, formatCPF } from "../types/person";
-import { HttpError } from "../lib/http";
+import type { Person } from "../../domain/types/person";
+import { PersonSchema, validateCPF, formatCPF } from "../../domain/types/person";
 import { Notification } from "./Notification";
 import { AutocompleteInput } from "./AutocompleteInput";
-import { referenceService } from "../services/referenceService";
+import { referenceService } from "../../infrastructure/services/referenceService";
 
 interface PersonFormProps {
   person?: Person;
   onSubmit: (data: Person) => Promise<void>;
   onCancel: () => void;
+  loading?: boolean;
+  error?: string | null;
+  showNotification?: boolean;
+  notificationType?: "success" | "error";
+  notificationMessage?: string;
+  onHideNotification?: () => void;
 }
 
-export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCancel }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationType, setNotificationType] = useState<"success" | "error">("error");
-  const [notificationMessage, setNotificationMessage] = useState("");
-  
+export const PersonForm: React.FC<PersonFormProps> = ({ 
+  person, 
+  onSubmit, 
+  onCancel,
+  loading = false,
+  error,
+  showNotification = false,
+  notificationType = "error",
+  notificationMessage = "",
+  onHideNotification
+}) => {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<Person>({
     resolver: zodResolver(PersonSchema),
     defaultValues: person || {
@@ -55,52 +64,16 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
     setValue("cpf", formattedValue);
   };
 
-  const showError = (message: string) => {
-    setNotificationType("error");
-    setNotificationMessage(message);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 5000);
-  };
-
-  const showSuccess = (message: string) => {
-    setNotificationType("success");
-    setNotificationMessage(message);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
-  };
-
   const handleFormSubmit = async (data: Person) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const cleanCPF = data.cpf.replace(/\D/g, "");
-      if (!validateCPF(cleanCPF)) {
-        showError("CPF inválido!");
-        setLoading(false);
-        return;
-      }
-
-      await onSubmit({
-        ...data,
-        cpf: cleanCPF,
-      });
-      
-      showSuccess(person ? "Pessoa atualizada com sucesso!" : "Pessoa cadastrada com sucesso!");
-    } catch (error) {
-      let errorMessage = 'Erro desconhecido';
-      
-      if (error instanceof HttpError) {
-        errorMessage = error.messages.join(', ');
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      showError(errorMessage);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    const cleanCPF = data.cpf.replace(/\D/g, "");
+    if (!validateCPF(cleanCPF)) {
+      throw new Error("CPF inválido!");
     }
+
+    await onSubmit({
+      ...data,
+      cpf: cleanCPF,
+    });
   };
 
   const searchGenders = async (query: string): Promise<string[]> => {
@@ -115,7 +88,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCanc
       <Notification
         type={notificationType}
         message={notificationMessage}
-        onClose={() => setShowNotification(false)}
+        onClose={onHideNotification || (() => {})}
         show={showNotification}
       />
       

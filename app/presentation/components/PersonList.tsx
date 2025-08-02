@@ -1,7 +1,7 @@
 import React from "react";
-import type { Person } from "../types/person";
-import { formatCPF, formatDate } from "../types/person";
-import noDataSvg from "../../assets/undraw_no-data_ig65.svg";
+import type { Person } from "../../domain/types/person";
+import { formatCPF, formatDate } from "../../domain/types/person";
+import noDataSvg from "../../../assets/undraw_no-data_ig65.svg";
 
 interface PersonListProps {
   persons: Person[];

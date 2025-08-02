@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDebounce } from "../hooks/useDebounce";
+import { useDebounce } from "../../controllers/hooks/useDebounce";
 
 interface AutocompleteInputProps {
   label: string;
@@ -8,7 +8,6 @@ interface AutocompleteInputProps {
   onChange: (value: string) => void;
   onSearch: (query: string) => Promise<string[]>;
   debounceDelay?: number;
-  className?: string;
 }
 
 export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
@@ -18,7 +17,6 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   onChange,
   onSearch,
   debounceDelay = 300,
-  className = "",
 }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -28,10 +26,13 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const searchSuggestions = async () => {
+    setInputValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
       if (!debouncedInputValue.trim()) {
         setSuggestions([]);
-        setShowSuggestions(false);
         return;
       }
 
@@ -39,22 +40,16 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       try {
         const results = await onSearch(debouncedInputValue);
         setSuggestions(results);
-        setShowSuggestions(results.length > 0);
       } catch (error) {
         console.error('Erro ao buscar sugestões:', error);
         setSuggestions([]);
-        setShowSuggestions(false);
       } finally {
         setLoading(false);
       }
     };
 
-    searchSuggestions();
+    fetchSuggestions();
   }, [debouncedInputValue, onSearch]);
-
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,6 +68,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     const newValue = e.target.value;
     setInputValue(newValue);
     onChange(newValue);
+    setShowSuggestions(true);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -88,38 +84,38 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   };
 
   return (
-    <div ref={wrapperRef} className={`relative ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+    <div ref={wrapperRef} className="relative">
+      <label htmlFor={label.toLowerCase()} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
-      <div className="relative">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleInputFocus}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-        />
-        {loading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-          </div>
-        )}
-      </div>
+      <input
+        type="text"
+        id={label.toLowerCase()}
+        placeholder={placeholder}
+        value={inputValue}
+        onChange={handleInputChange}
+        onFocus={handleInputFocus}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+      />
       
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && (suggestions.length > 0 || loading) && (
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-            >
-              {suggestion}
-            </button>
-          ))}
+          {loading ? (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary inline-block mr-2"></div>
+              Carregando...
+            </div>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
