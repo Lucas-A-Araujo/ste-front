@@ -29,6 +29,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         className="absolute inset-0"
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
         onClick={onClose}
+        data-testid="modal-overlay"
       />
       <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4 shadow-lg border border-gray-200 relative z-10">
         <h3 className="text-lg font-medium mb-4">{title}</h3>
