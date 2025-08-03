@@ -5,6 +5,7 @@ import { PersonForm } from "../components/PersonForm";
 import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { personRepository } from "../../infrastructure/repositories/personRepository";
+import { useSessionStorage } from "../../controllers/hooks/useSessionStorage";
 import { HttpError } from "../../infrastructure/lib/http";
 import type { Person } from "../../domain/types/person";
 
@@ -17,6 +18,11 @@ function UserDetailContent() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<"success" | "error">("error");
   const [notificationMessage, setNotificationMessage] = useState("");
+
+  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage('notification_data', {
+    showSuccessToast: false,
+    successMessage: ''
+  });
 
   const isNewUser = id === "new";
 
@@ -55,8 +61,10 @@ function UserDetailContent() {
     try {
       if (isNewUser) {
         await addPerson(personData);
-        sessionStorage.setItem('showSuccessToast', 'true');
-        sessionStorage.setItem('successMessage', 'Pessoa cadastrada com sucesso!');
+        setNotificationData({
+          showSuccessToast: true,
+          successMessage: 'Pessoa cadastrada com sucesso!'
+        });
         navigate("/");
       } else {
         if (person?.id) {

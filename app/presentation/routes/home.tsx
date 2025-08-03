@@ -8,6 +8,7 @@ import { ConfirmModal } from "../components/ConfirmModal";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { useDebounce } from "../../controllers/hooks/useDebounce";
+import { useSessionStorage } from "../../controllers/hooks/useSessionStorage";
 import type { Person } from "../../domain/types/person";
 
 function HomeContent() {
@@ -31,6 +32,11 @@ function HomeContent() {
   const [notificationMessage, setNotificationMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState<Person | null>(null);
+
+  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage('notification_data', {
+    showSuccessToast: false,
+    successMessage: ''
+  });
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -74,15 +80,11 @@ function HomeContent() {
   }, [error]);
 
   useEffect(() => {
-    const showSuccessToast = sessionStorage.getItem('showSuccessToast');
-    const successMessage = sessionStorage.getItem('successMessage');
-    
-    if (showSuccessToast === 'true' && successMessage) {
-      showSuccess(successMessage);
-      sessionStorage.removeItem('showSuccessToast');
-      sessionStorage.removeItem('successMessage');
+    if (notificationData.showSuccessToast && notificationData.successMessage) {
+      showSuccess(notificationData.successMessage);
+      removeNotificationData(); 
     }
-  }, []); 
+  }, [notificationData, removeNotificationData]); 
 
   const showError = (message: string) => {
     setNotificationType("error");
@@ -120,7 +122,6 @@ function HomeContent() {
       await deletePerson(personToDelete.id!);
       showSuccess("Pessoa excluída com sucesso!");
       
-      // Recarregar a lista após excluir
       const currentPage = parseInt(searchParams.get("page") || "1");
       const currentSearch = searchParams.get("q");
       
