@@ -6,8 +6,11 @@ export const useLocalStorage = <T>(
 ): [T, (value: T | ((val: T) => T)) => void, () => void] => {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (typeof window !== 'undefined') {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : initialValue;
+      }
+      return initialValue;
     } catch (error) {
       console.error(`Erro ao ler localStorage key "${key}":`, error);
       return initialValue;
@@ -20,7 +23,9 @@ export const useLocalStorage = <T>(
       
       setStoredValue(valueToStore);
       
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
     } catch (error) {
       console.error(`Erro ao definir localStorage key "${key}":`, error);
     }
@@ -30,7 +35,9 @@ export const useLocalStorage = <T>(
     try {
       setStoredValue(initialValue);
       
-      window.localStorage.removeItem(key);
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(key);
+      }
     } catch (error) {
       console.error(`Erro ao remover localStorage key "${key}":`, error);
     }

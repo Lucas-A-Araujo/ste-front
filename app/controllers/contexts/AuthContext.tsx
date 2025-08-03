@@ -38,7 +38,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    setLoading(false);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const login = useCallback(async (credentials: LoginRequest) => {

@@ -1,5 +1,12 @@
-import { Navigate } from "react-router";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Index() {
-  return <Navigate to="/home" replace />;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/home", { replace: true });
+  }, [navigate]);
+
+  return null;
 } 
