@@ -24,7 +24,6 @@ interface PersonContextType {
   searchPeople: (query: string, page?: number) => Promise<void>;
   loadPeople: (page?: number) => Promise<void>;
   getPersonById: (id: string) => Person | undefined;
-  isCPFUnique: (cpf: string, excludeId?: string) => boolean;
   refreshPersons: () => Promise<void>;
 }
 
@@ -161,12 +160,6 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     return persons.find(person => person.id === id);
   }, [persons]);
 
-  const isCPFUnique = useCallback((cpf: string, excludeId?: string) => {
-    return !persons.some(person => 
-      person.cpf === cpf && person.id !== excludeId
-    );
-  }, [persons]);
-
   const refreshPersons = useCallback(async () => {
     if (currentSearch) {
       await searchPeople(currentSearch, pagination?.page || 1);
@@ -188,7 +181,6 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     searchPeople,
     loadPeople,
     getPersonById,
-    isCPFUnique,
     refreshPersons,
   };
 

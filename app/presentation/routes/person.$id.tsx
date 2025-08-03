@@ -11,7 +11,7 @@ import type { Person } from "../../domain/types/person";
 function UserDetailContent() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { updatePerson, addPerson, isCPFUnique } = usePersons();
+  const { updatePerson, addPerson } = usePersons();
   const [person, setPerson] = useState<Person | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -23,14 +23,11 @@ function UserDetailContent() {
   useEffect(() => {
     const loadPerson = async () => {
       if (id && id !== "new") {
-        setLoading(true);
         try {
           const personData = await personRepository.getPersonById(id);
           setPerson(personData);
         } catch (error) {
           showError("Pessoa não encontrada");
-        } finally {
-          setLoading(false);
         }
       }
     };
@@ -57,20 +54,9 @@ function UserDetailContent() {
     
     try {
       if (isNewUser) {
-        if (!isCPFUnique(personData.cpf)) {
-          showError("CPF já cadastrado!");
-          setLoading(false);
-          return;
-        }
         await addPerson(personData);
         showSuccess("Pessoa cadastrada com sucesso!");
       } else {
-        if (!isCPFUnique(personData.cpf, person?.id)) {
-          showError("CPF já cadastrado!");
-          setLoading(false);
-          return;
-        }
-
         if (person?.id) {
           await updatePerson(person.id, personData);
           showSuccess("Pessoa atualizada com sucesso!");
@@ -95,17 +81,6 @@ function UserDetailContent() {
   const handleCancel = () => {
     navigate("/");
   };
-
-  if (loading && !person) {
-    return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
-        </div>
-      </Layout>
-    );
-  }
 
   if (id && id !== "new" && !person) {
     return (
