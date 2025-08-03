@@ -6,6 +6,9 @@ import { Layout } from "../components/Layout";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { useSessionStorage } from "../../controllers/hooks/useSessionStorage";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
+import { STORAGE_KEYS } from "../../infrastructure/constants";
+import { NOTIFICATION_CONFIG } from "../../controllers/constants";
 import { HttpError } from "../../infrastructure/lib/http";
 import type { Person } from "../../domain/types/person";
 
@@ -19,7 +22,7 @@ function UserDetailContent() {
   const [notificationType, setNotificationType] = useState<"success" | "error">("error");
   const [notificationMessage, setNotificationMessage] = useState("");
 
-  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage('notification_data', {
+  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage(STORAGE_KEYS.NOTIFICATION_DATA, {
     showSuccessToast: false,
     successMessage: ''
   });
@@ -33,7 +36,7 @@ function UserDetailContent() {
           const personData = await personRepository.getPersonById(id);
           setPerson(personData);
         } catch (error) {
-          showError("Pessoa não encontrada");
+          showError(ERROR_MESSAGES.PERSON_NOT_FOUND);
         }
       }
     };
@@ -42,17 +45,17 @@ function UserDetailContent() {
   }, [id]);
 
   const showSuccess = (message: string) => {
-    setNotificationType("success");
+    setNotificationType(NOTIFICATION_CONFIG.TYPES.SUCCESS);
     setNotificationMessage(message);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
+    setTimeout(() => setShowNotification(false), NOTIFICATION_CONFIG.SUCCESS_DURATION);
   };
 
   const showError = (message: string) => {
-    setNotificationType("error");
+    setNotificationType(NOTIFICATION_CONFIG.TYPES.ERROR);
     setNotificationMessage(message);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 5000);
+    setTimeout(() => setShowNotification(false), NOTIFICATION_CONFIG.ERROR_DURATION);
   };
 
   const handleSubmit = async (personData: Person) => {
@@ -63,18 +66,18 @@ function UserDetailContent() {
         await addPerson(personData);
         setNotificationData({
           showSuccessToast: true,
-          successMessage: 'Pessoa cadastrada com sucesso!'
+          successMessage: SUCCESS_MESSAGES.PERSON_CREATED
         });
         navigate("/");
       } else {
         if (person?.id) {
           await updatePerson(person.id, personData);
-          showSuccess("Pessoa atualizada com sucesso!");
+          showSuccess(SUCCESS_MESSAGES.PERSON_UPDATED);
         }
         navigate("/");
       }
     } catch (error) {
-      let errorMessage = 'Erro desconhecido';
+      let errorMessage: string = ERROR_MESSAGES.UNKNOWN_ERROR;
       
       if (error instanceof HttpError) {
         errorMessage = error.messages.join(', ');

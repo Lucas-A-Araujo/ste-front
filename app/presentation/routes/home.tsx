@@ -9,6 +9,9 @@ import { ProtectedRoute } from "../components/ProtectedRoute";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { useDebounce } from "../../controllers/hooks/useDebounce";
 import { useSessionStorage } from "../../controllers/hooks/useSessionStorage";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
+import { STORAGE_KEYS } from "../../infrastructure/constants";
+import { NOTIFICATION_CONFIG, DEBOUNCE_CONFIG } from "../../controllers/constants";
 import type { Person } from "../../domain/types/person";
 
 function HomeContent() {
@@ -33,12 +36,12 @@ function HomeContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [personToDelete, setPersonToDelete] = useState<Person | null>(null);
 
-  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage('notification_data', {
+  const [notificationData, setNotificationData, removeNotificationData] = useSessionStorage(STORAGE_KEYS.NOTIFICATION_DATA, {
     showSuccessToast: false,
     successMessage: ''
   });
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, DEBOUNCE_CONFIG.SEARCH);
 
   useEffect(() => {
     const urlSearch = searchParams.get("q");
@@ -87,17 +90,17 @@ function HomeContent() {
   }, [notificationData, removeNotificationData]); 
 
   const showError = (message: string) => {
-    setNotificationType("error");
+    setNotificationType(NOTIFICATION_CONFIG.TYPES.ERROR);
     setNotificationMessage(message);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 5000);
+    setTimeout(() => setShowNotification(false), NOTIFICATION_CONFIG.ERROR_DURATION);
   };
 
   const showSuccess = (message: string) => {
-    setNotificationType("success");
+    setNotificationType(NOTIFICATION_CONFIG.TYPES.SUCCESS);
     setNotificationMessage(message);
     setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
+    setTimeout(() => setShowNotification(false), NOTIFICATION_CONFIG.SUCCESS_DURATION);
   };
 
   const handleEdit = (person: Person) => {
@@ -120,7 +123,7 @@ function HomeContent() {
     
     try {
       await deletePerson(personToDelete.id!);
-      showSuccess("Pessoa excluída com sucesso!");
+      showSuccess(SUCCESS_MESSAGES.PERSON_DELETED);
       
       const currentPage = parseInt(searchParams.get("page") || "1");
       const currentSearch = searchParams.get("q");
@@ -132,7 +135,7 @@ function HomeContent() {
       }
     } catch (error) {
       console.error('Erro ao excluir pessoa:', error);
-      showError('Erro ao excluir pessoa. Tente novamente.');
+      showError(ERROR_MESSAGES.DELETE_ERROR);
     } finally {
       setDeletingId(null);
       setPersonToDelete(null);
