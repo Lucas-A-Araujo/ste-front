@@ -4,6 +4,8 @@ import type { AuthState, LoginRequest, User, LoginResponse } from "../../domain/
 import { authRepository } from "../../infrastructure/repositories/authRepository";
 import { useApi } from "../hooks/useApi";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { STORAGE_KEYS } from "../../infrastructure/config";
+import { AUTH_CONFIG } from "../../infrastructure/config";
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
@@ -29,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { execute } = useApi<LoginResponse>();
 
-  const [authData, setAuthData, removeAuthData] = useLocalStorage('auth_data', {
+  const [authData, setAuthData, removeAuthData] = useLocalStorage(STORAGE_KEYS.AUTH_DATA, {
     user: null as User | null,
     token: null as string | null,
     isAuthenticated: false,
@@ -49,6 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: true,
       });
       
+      console.log(AUTH_CONFIG.TOKEN_LOG_PREFIX + response.access_token.substring(0, 20) + '...');
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
