@@ -1,5 +1,5 @@
 import { httpClient } from "../lib/http";
-import { API_CONFIG } from "../config/api";
+import { API_CONFIG } from "../constants/api.constant";
 
 export { HttpError } from "../lib/http";
 

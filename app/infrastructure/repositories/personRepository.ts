@@ -1,7 +1,7 @@
 import type { Person, APIPerson, PaginatedResponse, PaginationParams } from "../../domain/types/person";
 import { mapAPIPersonToPerson, mapPersonToAPIPerson } from "../../domain/types/person";
 import { httpClient } from "../lib/http";
-import { API_CONFIG } from "../config/api";
+import { API_CONFIG } from "../constants/api.constant";
 
 export { HttpError } from "../lib/http";
 

@@ -4,8 +4,8 @@ import type { AuthState, LoginRequest, User, LoginResponse } from "../../domain/
 import { authRepository } from "../../infrastructure/repositories/authRepository";
 import { useApi } from "../hooks/useApi";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { STORAGE_KEYS } from "../../infrastructure/config";
-import { AUTH_CONFIG } from "../../infrastructure/config";
+import { STORAGE_KEYS } from "../../infrastructure/constants";
+import { AUTH_CONFIG } from "../../infrastructure/constants";
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;

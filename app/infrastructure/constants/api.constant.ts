@@ -1,3 +1,4 @@
+// Configurações da API REST
 export const API_CONFIG = {
   BASE_URL: 'http://localhost:4001',
   VERSION: 'v1',
@@ -8,4 +9,9 @@ export const API_CONFIG = {
     NATIONALITIES: '/reference/nationalities',
     BIRTHPLACES: '/reference/birthplaces',
   },
+} as const;
+
+export const AUTH_CONFIG = {
+  TOKEN_PREFIX: 'Bearer ',
+  TOKEN_LOG_PREFIX: 'Token salvo no localStorage: ',
 } as const; 

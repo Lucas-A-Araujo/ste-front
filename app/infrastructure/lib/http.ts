@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
 import type { APIErrorResponse } from '../../domain/types/api';
-import { API_CONFIG } from '../config/api';
+import { API_CONFIG, AUTH_CONFIG, STORAGE_KEYS } from '../constants';
 
 export class HttpError extends Error {
   constructor(
@@ -12,6 +12,24 @@ export class HttpError extends Error {
     this.name = 'HttpError';
   }
 }
+
+const getAuthToken = (): string | null => {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  } catch (error) {
+    console.error('Erro ao acessar auth_token:', error);
+    return null;
+  }
+};
+
+const removeAuthData = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+  } catch (error) {
+    console.error('Erro ao remover dados de autenticação:', error);
+  }
+};
 
 class HttpClient {
   private client: AxiosInstance;
@@ -32,9 +50,9 @@ class HttpClient {
     this.client.interceptors.request.use(
       (config) => {
         // Adicionar token de autenticação se disponível
-        const token = localStorage.getItem('auth_token');
+        const token = getAuthToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers.Authorization = AUTH_CONFIG.TOKEN_PREFIX + token;
           console.log('Token adicionado à requisição:', token.substring(0, 20) + '...');
         } else {
           console.log('Nenhum token encontrado no localStorage');
@@ -57,8 +75,7 @@ class HttpClient {
           // Se receber 401 (Unauthorized), limpar token e redirecionar para login
           if (error.response.status === 401) {
             console.log('Erro 401 - Token inválido, redirecionando para login');
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_user');
+            removeAuthData();
             window.location.href = '/login';
           }
           
