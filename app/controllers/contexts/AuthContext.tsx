@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { AuthState, LoginRequest, User, LoginResponse } from "../../domain/types/auth";
 import { authRepository } from "../../infrastructure/repositories/authRepository";
 import { useApi } from "../hooks/useApi";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
@@ -25,80 +26,48 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    token: null,
+  const [loading, setLoading] = useState(true);
+  const { execute } = useApi<LoginResponse>();
+
+  const [authData, setAuthData, removeAuthData] = useLocalStorage('auth_data', {
+    user: null as User | null,
+    token: null as string | null,
     isAuthenticated: false,
-    loading: true,
   });
 
-  const { loading, error, execute } = useApi<LoginResponse>();
-
-  // Verificar se há token salvo no localStorage ao inicializar
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('auth_user');
-    
-    if (token && userStr) {
-      try {
-        const user: User = JSON.parse(userStr);
-        setAuthState({
-          user,
-          token,
-          isAuthenticated: true,
-          loading: false,
-        });
-      } catch (error) {
-        console.error('Erro ao parsear dados do usuário:', error);
-        logout();
-      }
-    } else {
-      setAuthState(prev => ({ ...prev, loading: false }));
-    }
+    setLoading(false);
   }, []);
 
   const login = useCallback(async (credentials: LoginRequest) => {
     try {
       const response = await execute(() => authRepository.login(credentials));
       
-      // Salvar dados no localStorage
-      localStorage.setItem('auth_token', response.access_token);
-      localStorage.setItem('auth_user', JSON.stringify(response.user));
-      
-      console.log('Token salvo no localStorage:', response.access_token.substring(0, 20) + '...');
-      
-      setAuthState({
+      setAuthData({
         user: response.user,
         token: response.access_token,
         isAuthenticated: true,
-        loading: false,
       });
+      
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
     }
-  }, [execute]);
+  }, [execute, setAuthData]);
 
   const logout = useCallback(() => {
-    // Limpar dados do localStorage
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    
-    setAuthState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      loading: false,
-    });
-  }, []);
+    removeAuthData();
+  }, [removeAuthData]);
 
   const checkAuth = useCallback(() => {
-    const token = localStorage.getItem('auth_token');
-    return !!token;
-  }, []);
+    return authData.isAuthenticated;
+  }, [authData.isAuthenticated]);
 
   const contextValue: AuthContextType = {
-    ...authState,
+    user: authData.user,
+    token: authData.token,
+    isAuthenticated: authData.isAuthenticated,
+    loading,
     login,
     logout,
     checkAuth,
