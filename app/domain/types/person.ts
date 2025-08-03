@@ -41,7 +41,7 @@ export const mapAPIPersonToPerson = (apiPerson: APIPerson): Person => {
     dataNascimento: apiPerson.birthDate.split('T')[0], 
     naturalidade: apiPerson.naturalness || "",
     nacionalidade: apiPerson.nationality || "",
-    cpf: formatCPF(apiPerson.cpf), 
+    cpf: apiPerson.cpf, 
   };
 };
 
@@ -70,7 +70,6 @@ export const validateCPF = (cpf: string): boolean => {
 export const formatCPF = (cpf: string): string => {
   const cleanCPF = cpf.replace(/\D/g, "");
   
-  // Aplica formatação progressiva conforme o usuário digita
   if (cleanCPF.length <= 3) {
     return cleanCPF;
   } else if (cleanCPF.length <= 6) {
@@ -80,6 +79,14 @@ export const formatCPF = (cpf: string): string => {
   } else {
     return `${cleanCPF.slice(0, 3)}.${cleanCPF.slice(3, 6)}.${cleanCPF.slice(6, 9)}-${cleanCPF.slice(9, 11)}`;
   }
+};
+
+export const formatMaskedCPF = (cpf: string): string => {
+  if (cpf.includes('*')) {
+    return cpf;
+  }
+  
+  return formatCPF(cpf);
 };
 
 export const formatDate = (date: string): string => {

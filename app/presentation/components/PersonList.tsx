@@ -1,6 +1,6 @@
 import React from "react";
 import type { Person } from "../../domain/types/person";
-import { formatCPF, formatDate } from "../../domain/types/person";
+import { formatMaskedCPF, formatDate } from "../../domain/types/person";
 import { Pagination } from "./Pagination";
 import noDataSvg from "../../../assets/undraw_no-data_ig65.svg";
 
@@ -88,7 +88,7 @@ export const PersonList: React.FC<PersonListProps> = ({
                   <div className="text-sm font-medium text-gray-900">{person.nome}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatCPF(person.cpf)}</div>
+                  <div className="text-sm text-gray-900">{formatMaskedCPF(person.cpf)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{person.email || "-"}</div>
