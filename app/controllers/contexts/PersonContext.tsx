@@ -56,13 +56,14 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
   const [currentSearch, setCurrentSearch] = useState("");
   const { loading, error, execute } = useApi<PaginatedResponse<Person>>();
   const { execute: executePerson } = useApi<Person>();
+  const { execute: executeVoid } = useApi<void>();
 
   const loadPeople = useCallback(async (page: number = 1) => {
     try {
       const params: PaginationParams = {
         page,
-        limit: 10, // Itens por página
-        search: undefined // Sempre carregar todas as pessoas
+        limit: 10, 
+        search: undefined 
       };
       
       const data = await execute(() => personRepository.getPeople(params));
@@ -121,7 +122,6 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
     try {
       const newPerson = await executePerson(() => personRepository.createPerson(person));
       setPersons(prev => [...prev, newPerson]);
-      // Atualizar contagem total
       if (pagination) {
         setPagination(prev => prev ? { ...prev, total: prev.total + 1 } : null);
       }
@@ -145,16 +145,15 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
 
   const deletePerson = useCallback(async (id: string) => {
     try {
-      await executePerson(() => personRepository.deletePerson(id));
+      await executeVoid(() => personRepository.deletePerson(id));
       setPersons(prev => prev.filter(person => person.id !== id));
-      // Atualizar contagem total
       if (pagination) {
         setPagination(prev => prev ? { ...prev, total: prev.total - 1 } : null);
       }
     } catch (error) {
       throw error;
     }
-  }, [pagination, executePerson]);
+  }, [pagination, executeVoid]);
 
   const getPersonById = useCallback((id: string) => {
     return persons.find(person => person.id === id);
