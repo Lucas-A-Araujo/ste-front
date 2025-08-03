@@ -6,6 +6,7 @@ import { PersonSchema, validateCPF, formatCPF } from "../../domain/types/person"
 import { Notification } from "./Notification";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { referenceRepository } from "../../infrastructure/repositories/referenceRepository";
+import { FORM_CONFIG } from "../../controllers/constants/ui.constant";
 
 interface PersonFormProps {
   person?: Person;
@@ -30,6 +31,17 @@ export const PersonForm: React.FC<PersonFormProps> = ({
 }) => {
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
   
+  const getMaxDate = () => {
+    const today = new Date();
+    if (FORM_CONFIG.MIN_AGE <= 0) {
+      return today.toISOString().split('T')[0];
+    }
+    
+    const maxDate = new Date();
+    maxDate.setFullYear(today.getFullYear() - FORM_CONFIG.MIN_AGE);
+    return maxDate.toISOString().split('T')[0];
+  };
+
   const { register, handleSubmit, formState: { errors }, watch, setValue, setError, trigger } = useForm<Person>({
     resolver: zodResolver(PersonSchema),
     mode: "onSubmit",
@@ -83,14 +95,6 @@ export const PersonForm: React.FC<PersonFormProps> = ({
     const cleanCPF = data.cpf.replace(/\D/g, "");
     if (!validateCPF(cleanCPF)) {
       newErrors.cpf = "CPF inválido!";
-    }
-    
-    if (!data.nome?.trim()) {
-      newErrors.nome = "Nome é obrigatório";
-    }
-    
-    if (!data.dataNascimento) {
-      newErrors.dataNascimento = "Data de nascimento é obrigatória";
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -200,6 +204,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
               {...register("dataNascimento")}
               type="date"
               id="dataNascimento"
+              max={getMaxDate()}
               onChange={(e) => {
                 register("dataNascimento").onChange(e);
                 handleFieldChange("dataNascimento");

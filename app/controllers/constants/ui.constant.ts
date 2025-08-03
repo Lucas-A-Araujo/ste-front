@@ -22,4 +22,5 @@ export const PAGINATION_CONFIG = {
 export const FORM_CONFIG = {
   CPF_MAX_LENGTH: 14,
   CPF_MASK: '000.000.000-00',
+  MIN_AGE: 20,
 } as const; 

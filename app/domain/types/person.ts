@@ -1,11 +1,29 @@
 import { z } from "zod";
+import { FORM_CONFIG } from "../../controllers/constants/ui.constant";
 
 export const PersonSchema = z.object({
   id: z.string().optional(),
   nome: z.string().min(1, "Nome é obrigatório"),
   sexo: z.string().nullable().optional(),
   email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
-  dataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
+  dataNascimento: z.string().min(1, "Data de nascimento é obrigatória")
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      return selectedDate <= today;
+    }, "Data de nascimento não pode ser uma data futura")
+    .refine((date) => {
+      if (FORM_CONFIG.MIN_AGE <= 0) return true; 
+      
+      const selectedDate = new Date(date);
+      const today = new Date();
+      const minDate = new Date();
+      minDate.setFullYear(today.getFullYear() - FORM_CONFIG.MIN_AGE);
+      minDate.setHours(23, 59, 59, 999);
+      
+      return selectedDate <= minDate;
+    }, `Idade mínima deve ser ${FORM_CONFIG.MIN_AGE} anos`),
   naturalidade: z.string().nullable().optional(),
   nacionalidade: z.string().nullable().optional(),
   cpf: z.string().min(1, "CPF é obrigatório").refine((cpf) => {
