@@ -74,13 +74,13 @@ function HomeContent() {
   }, [error]);
 
   useEffect(() => {
-    const showSuccessToast = localStorage.getItem('showSuccessToast');
-    const successMessage = localStorage.getItem('successMessage');
+    const showSuccessToast = sessionStorage.getItem('showSuccessToast');
+    const successMessage = sessionStorage.getItem('successMessage');
     
     if (showSuccessToast === 'true' && successMessage) {
       showSuccess(successMessage);
-      localStorage.removeItem('showSuccessToast');
-      localStorage.removeItem('successMessage');
+      sessionStorage.removeItem('showSuccessToast');
+      sessionStorage.removeItem('successMessage');
     }
   }, []); 
 

@@ -55,8 +55,8 @@ function UserDetailContent() {
     try {
       if (isNewUser) {
         await addPerson(personData);
-        localStorage.setItem('showSuccessToast', 'true');
-        localStorage.setItem('successMessage', 'Pessoa cadastrada com sucesso!');
+        sessionStorage.setItem('showSuccessToast', 'true');
+        sessionStorage.setItem('successMessage', 'Pessoa cadastrada com sucesso!');
         navigate("/");
       } else {
         if (person?.id) {
