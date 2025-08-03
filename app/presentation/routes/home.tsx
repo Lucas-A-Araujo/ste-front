@@ -73,6 +73,17 @@ function HomeContent() {
     }
   }, [error]);
 
+  useEffect(() => {
+    const showSuccessToast = localStorage.getItem('showSuccessToast');
+    const successMessage = localStorage.getItem('successMessage');
+    
+    if (showSuccessToast === 'true' && successMessage) {
+      showSuccess(successMessage);
+      localStorage.removeItem('showSuccessToast');
+      localStorage.removeItem('successMessage');
+    }
+  }, []); 
+
   const showError = (message: string) => {
     setNotificationType("error");
     setNotificationMessage(message);

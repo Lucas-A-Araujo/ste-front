@@ -55,14 +55,16 @@ function UserDetailContent() {
     try {
       if (isNewUser) {
         await addPerson(personData);
-        showSuccess("Pessoa cadastrada com sucesso!");
+        localStorage.setItem('showSuccessToast', 'true');
+        localStorage.setItem('successMessage', 'Pessoa cadastrada com sucesso!');
+        navigate("/");
       } else {
         if (person?.id) {
           await updatePerson(person.id, personData);
           showSuccess("Pessoa atualizada com sucesso!");
         }
+        navigate("/");
       }
-      navigate("/");
     } catch (error) {
       let errorMessage = 'Erro desconhecido';
       
