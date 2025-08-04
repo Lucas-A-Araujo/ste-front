@@ -1,87 +1,150 @@
-# Welcome to React Router!
+# Sistema de Gerenciamento de Pessoas
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Sistema frontend para gerenciamento de pessoas com integração completa com API REST.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## 🛠️ Tecnologias Utilizadas
 
-## Features
+- **React 19** com TypeScript
+- **React Router 7** para navegação
+- **React Hook Form** para formulários
+- **Zod** para validação de schemas
+- **Tailwind CSS** para estilização
+- **React Icons** para ícones
+- **Axios** para requisições HTTP
+- **Vite** para build e desenvolvimento
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## 📋 Pré-requisitos
 
-## Getting Started
+- **Node.js 18+** (recomendado Node.js 20)
+- **npm** ou **yarn**
+- **API backend** rodando em `localhost:4001` ou em outro lugar que você pode configurar
 
-### Installation
+## 🚀 Como Instalar e Executar
 
-Install the dependencies:
+### Instalação Local
+
+1. **Clone o repositório:**
+
+   ```bash
+   git clone <url-do-repositorio>
+   cd ste-front
+   ```
+
+   A URL pode ser pega no botão verde "<> code" mais acima
+
+2. **Instale as dependências:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Execute em modo de desenvolvimento:**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Acesse a aplicação:**
+   - Abra seu navegador e vá para `http://localhost:5173`
+
+## 📖 Como Usar o Sistema
+
+### 🏠 Página Inicial
+
+- Acesse `http://localhost:5173` (desenvolvimento) ou `http://localhost:3000` (produção)
+- Você será direcionado para a página de login ou home se já estiver autenticado
+
+### 👥 Gerenciando Pessoas
+
+#### **Listando Pessoas**
+
+- A página inicial mostra todas as pessoas cadastradas
+- Use a barra de busca para encontrar pessoas específicas
+
+#### **Cadastrando uma Nova Pessoa**
+
+1. Clique no botão **"Nova Pessoa"** no canto superior direito
+2. Preencha o formulário:
+   - **Nome** (obrigatório): Nome completo da pessoa
+   - **CPF** (obrigatório): Será formatado automaticamente (000.000.000-00)
+   - **Data de Nascimento** (obrigatório): Use o seletor de data(não pode ser maior que a data atual)
+   - **E-mail** (opcional): E-mail válido
+   - **Sexo** (opcional): Use o autocomplete ou digite livremente
+   - **Naturalidade** (opcional): Use o autocomplete para buscar cidades
+   - **Nacionalidade** (opcional): Use o autocomplete para buscar países
+3. Clique em **"Salvar"**
+4. Uma notificação de sucesso aparecerá se tudo estiver correto
+
+#### **Editando uma Pessoa**
+
+1. Na listagem, clique no ícone de **editar** (lápis) ao lado da pessoa
+2. O formulário será carregado com os dados atuais
+3. Faça as alterações necessárias
+4. Clique em **"Salvar"**
+5. Uma notificação de sucesso aparecerá
+
+#### **Excluindo uma Pessoa**
+
+1. Na listagem, clique em **excluir** ao lado da pessoa
+2. Uma confirmação aparecerá
+3. Clique em **"Confirmar"** para excluir
+
+### 🔍 Funcionalidades de Busca e Autocomplete
+
+#### **Busca de Pessoas**
+
+- Digite na barra de busca para encontrar pessoas
+- A busca é feita em tempo real na API
+- Aguarde 500ms após parar de digitar para a busca ser executada
+
+#### **Autocomplete**
+
+- **Naturalidade**: Digite para buscar cidades automaticamente
+- **Nacionalidade**: Digite para buscar países automaticamente
+- **Sexo**: Digite ou selecione entre "Masculino" e "Feminino"
+
+### Configuração da API
+
+O sistema espera que a API esteja rodando em `http://localhost:4001`. Se sua API estiver em um endereço diferente, você pode alterar a configuração em `app/config/api.ts`.
+
+## 🧪 Testes
 
 ```bash
-npm install
+# Executar todos os testes
+npm test
+
+# Executar testes em modo watch
+npm test -- --watch
+
+# Executar testes com coverage
+npm test -- --coverage
 ```
 
-### Development
+## 🐛 Solução de Problemas
 
-Start the development server with HMR:
+### Problema: "API não encontrada"
 
-```bash
-npm run dev
-```
+- Verifique se a API está rodando em `localhost:4001`
+- Verifique se não há firewall bloqueando a conexão
 
-Your application will be available at `http://localhost:5173`.
+### Problema: "Erro de build"
 
-## Building for Production
+- Execute `npm install` para reinstalar dependências
+- Verifique se está usando Node.js 18+
 
-Create a production build:
+### Problema: "Página não carrega"
 
-```bash
-npm run build
-```
+- Verifique se o servidor está rodando (`npm run dev`)
+- Verifique se a porta 5173 não está sendo usada por outro processo
 
-## Deployment
+### Problema: "Autocomplete não funciona"
 
-### Docker Deployment
+- Verifique se a API de referências está funcionando
+- Verifique a conexão com a internet(se a api não estiver rodando localmente)
 
-To build and run using Docker:
+## 📝 Notas de Desenvolvimento
 
-```bash
-docker build -t my-app .
+### Validação de CPF
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+- Formatação automática (000.000.000-00)
+- Verificação de unicidade no sistema
