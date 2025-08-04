@@ -55,7 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: true,
       });
       
-      console.log(AUTH_CONFIG.TOKEN_LOG_PREFIX + response.access_token.substring(0, 20) + '...');
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;

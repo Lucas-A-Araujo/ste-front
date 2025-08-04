@@ -59,9 +59,6 @@ class HttpClient {
         const token = getAuthToken();
         if (token) {
           config.headers.Authorization = AUTH_CONFIG.TOKEN_PREFIX + token;
-          console.log('Token adicionado à requisição:', token.substring(0, 20) + '...');
-        } else {
-          console.log('Nenhum token encontrado no localStorage');
         }
         return config;
       },
@@ -79,7 +76,6 @@ class HttpClient {
           const errorData = error.response.data as APIErrorResponse;
           
           if (error.response.status === 401 && !this.isRedirecting) {
-            console.log('Erro 401 - Token inválido, redirecionando para login');
             this.isRedirecting = true;
             removeAuthData();
             
