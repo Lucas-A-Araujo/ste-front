@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../controllers/contexts/AuthContext";
-import { Layout } from "../components/Layout";
 import { Notification } from "../components/Notification";
-import { FaEye, FaEyeSlash, FaSignInAlt, FaUser, FaLock } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaSignInAlt, FaUser, FaLock, FaBuilding } from "react-icons/fa";
 
 export function meta() {
   return [
@@ -79,22 +78,23 @@ export default function Login() {
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6">
+        {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/10 mb-4">
-            <FaSignInAlt className="h-8 w-8 text-primary" />
+          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover shadow-lg mb-4 transform hover:scale-105 transition-transform duration-300">
+            <FaBuilding className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Login
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            Bem-vindo
           </h2>
           <p className="text-gray-600">
-            Acesse o sistema de gerenciamento de pessoas
+            Acesse o sistema de gerenciamento
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-md mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-white/30">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -153,10 +153,10 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-md p-3">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-4 w-4 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -171,7 +171,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
               >
                 {loading ? (
                   <div className="flex items-center">
@@ -188,19 +188,19 @@ export default function Login() {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <p className="text-xs text-gray-500">
-              Use as credenciais fornecidas pelo administrador do sistema
+              Use as credenciais fornecidas pelo administrador
             </p>
           </div>
         </div>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm font-medium text-gray-700">
             Sistema de Gerenciamento de Pessoas
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            © 2024 Stefanini
+            © {new Date().getFullYear()} Ste
           </p>
         </div>
       </div>
@@ -213,6 +213,6 @@ export default function Login() {
           show={showNotification}
         />
       )}
-    </Layout>
+    </div>
   );
 }
