@@ -5,7 +5,7 @@ import { authRepository } from "../../infrastructure/repositories/authRepository
 import { useApi } from "../hooks/useApi";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { STORAGE_KEYS } from "../../infrastructure/constants";
-import { AUTH_CONFIG } from "../../infrastructure/constants";
+import { logger } from "../../infrastructure/lib/logger";
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
@@ -38,8 +38,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
+    logger.auth('Inicializando AuthContext', { 
+      hasToken: !!authData.token, 
+      isAuthenticated: authData.isAuthenticated 
+    });
+
     const timer = setTimeout(() => {
       setLoading(false);
+      logger.auth('AuthContext inicializado');
     }, 0);
 
     return () => clearTimeout(timer);
@@ -56,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
       
     } catch (error) {
-      console.error('Erro no login:', error);
+      logger.errorWithStack('Erro no login', error as Error, 'AUTH');
       throw error;
     }
   }, [execute, setAuthData]);

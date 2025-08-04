@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { Person, PaginatedResponse, PaginationParams } from "../../domain/types/person";
 import { personRepository } from "../../infrastructure/repositories/personRepository";
 import { useApi } from "../hooks/useApi";
+import { logger } from "../../infrastructure/lib/logger";
 
 interface PersonContextType {
   persons: Person[];
@@ -77,7 +78,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
         hasNext: data.hasNext
       });
     } catch (error) {
-      console.error('Erro ao carregar pessoas:', error);
+      logger.errorWithStack('Erro ao carregar pessoas', error as Error, 'PERSON');
     } finally {
       setInitialLoading(false);
     }
@@ -111,7 +112,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
         hasNext: data.hasNext
       });
     } catch (error) {
-      console.error('Erro ao buscar pessoas:', error);
+      logger.errorWithStack('Erro ao buscar pessoas', error as Error, 'PERSON');
       await loadPeople(page);
     } finally {
       setSearchLoading(false);
@@ -126,6 +127,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
         setPagination(prev => prev ? { ...prev, total: prev.total + 1 } : null);
       }
     } catch (error) {
+      logger.errorWithStack('Erro ao adicionar pessoa', error as Error, 'PERSON');
       throw error;
     }
   }, [pagination, executePerson]);
@@ -139,6 +141,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
         )
       );
     } catch (error) {
+      logger.errorWithStack('Erro ao atualizar pessoa', error as Error, 'PERSON');
       throw error;
     }
   }, [executePerson]);
@@ -151,6 +154,7 @@ export const PersonProvider: React.FC<PersonProviderProps> = ({ children }) => {
         setPagination(prev => prev ? { ...prev, total: prev.total - 1 } : null);
       }
     } catch (error) {
+      logger.errorWithStack('Erro ao excluir pessoa', error as Error, 'PERSON');
       throw error;
     }
   }, [pagination, executeVoid]);

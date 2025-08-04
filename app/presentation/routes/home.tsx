@@ -138,7 +138,6 @@ function HomeContent() {
         await loadPeople(currentPage);
       }
     } catch (error) {
-      console.error('Erro ao excluir pessoa:', error);
       showError(ERROR_MESSAGES.DELETE_ERROR);
     } finally {
       setDeletingId(null);

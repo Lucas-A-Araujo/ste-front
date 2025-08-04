@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../controllers/contexts/AuthContext";
+import { logger } from "../../infrastructure/lib/logger";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Index() {
       if (isAuthenticated) {
         navigate("/home", { replace: true });
       } else {
+        logger.navigation('Redirecionando usuário não autenticado para login');
         navigate("/login", { replace: true });
       }
     }

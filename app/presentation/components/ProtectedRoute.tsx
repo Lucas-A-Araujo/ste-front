@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../../controllers/contexts/AuthContext";
 import { useNavigate } from "react-router";
+import { logger } from "../../infrastructure/lib/logger";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
+      logger.navigation('Acesso negado a rota protegida, redirecionando para login');
       navigate("/login", { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);

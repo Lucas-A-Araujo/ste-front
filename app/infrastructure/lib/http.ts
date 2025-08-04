@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
 import type { APIErrorResponse } from '../../domain/types/api';
 import { API_CONFIG, AUTH_CONFIG, STORAGE_KEYS } from '../constants';
+import { logger } from './logger';
 
 export class HttpError extends Error {
   constructor(
@@ -24,7 +25,7 @@ const getAuthToken = (): string | null => {
     }
     return null;
   } catch (error) {
-    console.error('Erro ao acessar token de autenticação:', error);
+    logger.error('Erro ao acessar token de autenticação', 'HTTP', { error });
     return null;
   }
 };
@@ -33,7 +34,7 @@ const removeAuthData = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
   } catch (error) {
-    console.error('Erro ao remover dados de autenticação:', error);
+    logger.error('Erro ao remover dados de autenticação', 'HTTP', { error });
   }
 };
 
@@ -63,6 +64,7 @@ class HttpClient {
         return config;
       },
       (error) => {
+        logger.error('Erro na configuração da requisição', 'HTTP', { error });
         return Promise.reject(error);
       }
     );
@@ -75,12 +77,22 @@ class HttpClient {
         if (error.response) {
           const errorData = error.response.data as APIErrorResponse;
           
+          logger.api('Erro na requisição', {
+            url: error.config?.url,
+            method: error.config?.method,
+            status: error.response.status,
+            statusText: error.response.statusText,
+            error: errorData
+          });
+          
           if (error.response.status === 401 && !this.isRedirecting) {
+            logger.warn('Token inválido detectado, redirecionando para login');
             this.isRedirecting = true;
             removeAuthData();
             
             setTimeout(() => {
               if (window.location.pathname !== '/login') {
+                logger.navigation('Redirecionando para login devido a erro 401');
                 window.location.href = '/login';
               }
               this.isRedirecting = false;
@@ -93,12 +105,20 @@ class HttpClient {
             errorData.message
           );
         } else if (error.code === 'ECONNABORTED') {
+          logger.error('Timeout da requisição', 'HTTP', { 
+            url: error.config?.url,
+            timeout: API_CONFIG.TIMEOUT 
+          });
           throw new HttpError(
             408,
             'TIMEOUT_ERROR',
             ['Timeout da requisição']
           );
         } else {
+          logger.error('Erro de conexão', 'HTTP', { 
+            url: error.config?.url,
+            error: error.message 
+          });
           throw new HttpError(
             500,
             'NETWORK_ERROR',
