@@ -2,329 +2,149 @@
 
 Sistema frontend para gerenciamento de pessoas com integração completa com API REST.
 
-## Funcionalidades
+## 🛠️ Tecnologias Utilizadas
 
-- ✅ **Listagem de pessoas** com busca e filtros
-- ✅ **Cadastro de novas pessoas** com validação completa
-- ✅ **Edição de pessoas** existentes
-- ✅ **Exclusão de pessoas** com confirmação
-- ✅ **Validação de CPF** em tempo real
-- ✅ **Formatação automática de CPF** (000.000.000-00)
-- ✅ **Integração completa com API** (localhost:4001)
-- ✅ **Tratamento de erros** da API com mensagens personalizadas
-- ✅ **Estados de loading** durante operações
-- ✅ **Notificações elegantes** para sucesso e erro
-- ✅ **Interface responsiva** com Tailwind CSS
-- ✅ **Mapeamento automático** entre formatos da API e frontend
-- ✅ **Busca com debounce** (500ms) e requisições para API
-- ✅ **Autocomplete** para nacionalidade, naturalidade e sexo
-- ✅ **Serviços modulares** por domínio
-- ✅ **Cliente HTTP centralizado** com Axios
-
-## Tecnologias Utilizadas
-
-- **React** com TypeScript
-- **React Router** para navegação
+- **React 19** com TypeScript
+- **React Router 7** para navegação
 - **React Hook Form** para formulários
 - **Zod** para validação de schemas
 - **Tailwind CSS** para estilização
 - **React Icons** para ícones
 - **Axios** para requisições HTTP
+- **Vite** para build e desenvolvimento
 
-## Estrutura do Projeto
+## 📋 Pré-requisitos
 
-```
-app/
-├── components/          # Componentes reutilizáveis
-│   ├── Layout.tsx
-│   ├── PersonForm.tsx
-│   ├── PersonList.tsx
-│   ├── Notification.tsx
-│   └── AutocompleteInput.tsx
-├── contexts/           # Contextos React
-│   └── PersonContext.tsx
-├── hooks/              # Hooks personalizados
-│   ├── useApi.ts
-│   └── useDebounce.ts
-├── lib/                # Bibliotecas e utilitários
-│   └── http.ts         # Cliente HTTP centralizado
-├── routes/             # Páginas da aplicação
-│   ├── home.tsx
-│   └── person.$id.tsx
-├── services/           # Serviços de API (modulares)
-│   ├── personService.ts
-│   └── referenceService.ts
-├── types/              # Definições de tipos
-│   ├── person.ts
-│   └── api.ts
-└── config/             # Configurações
-    └── api.ts
-```
+- **Node.js 18+** (recomendado Node.js 20)
+- **npm** ou **yarn**
+- **API backend** rodando em `localhost:4001` ou em outro lugar que você pode configurar
 
-## Integração com API
+## 🚀 Como Instalar e Executar
 
-### Endpoints Utilizados
+### Instalação Local
 
-- `GET /v1/people` - Listar todas as pessoas
-- `GET /v1/people?q={query}` - Buscar pessoas por termo
-- `GET /v1/people/:id` - Buscar pessoa por ID
-- `POST /v1/people` - Criar nova pessoa
-- `PUT /v1/people/:id` - Atualizar pessoa
-- `DELETE /v1/people/:id` - Excluir pessoa
-- `GET /v1/reference/nationalities?q={query}` - Buscar nacionalidades
-- `GET /v1/reference/birthplaces?q={query}` - Buscar naturalidades
+1. **Clone o repositório:**
 
-### Cliente HTTP Centralizado
+   ```bash
+   git clone <url-do-repositorio>
+   cd ste-front
+   ```
 
-O sistema utiliza um cliente HTTP centralizado baseado em Axios:
+   A URL pode ser pega no botão verde "<> code" mais acima
 
-#### **HttpClient** (`app/lib/http.ts`)
-- ✅ **Configuração centralizada** - Base URL, timeout, headers
-- ✅ **Interceptors automáticos** - Para requisições e respostas
-- ✅ **Tratamento de erros** - Conversão automática para `HttpError`
-- ✅ **Timeout configurável** - 10 segundos por padrão
-- ✅ **Tipagem TypeScript** - Suporte completo a tipos genéricos
-- ✅ **Métodos HTTP** - GET, POST, PUT, DELETE, PATCH
+2. **Instale as dependências:**
 
-#### **Funcionalidades do Cliente:**
-```typescript
-// Configuração automática
-baseURL: 'http://localhost:4001/v1'
-timeout: 10000ms
+   ```bash
+   npm install
+   ```
 
-// Métodos disponíveis
-await httpClient.get<T>(url)
-await httpClient.post<T>(url, data)
-await httpClient.put<T>(url, data)
-await httpClient.delete<T>(url)
-await httpClient.patch<T>(url, data)
-```
+3. **Execute em modo de desenvolvimento:**
 
-#### **Tratamento de Erros:**
-- ✅ **Erros da API** - Converte automaticamente para `HttpError`
-- ✅ **Timeout** - Erro específico para requisições expiradas
-- ✅ **Erro de rede** - Para problemas de conectividade
-- ✅ **Status codes** - Preserva códigos de status da API
+   ```bash
+   npm run dev
+   ```
 
-### Arquitetura de Serviços
+4. **Acesse a aplicação:**
+   - Abra seu navegador e vá para `http://localhost:5173`
 
-O sistema utiliza uma arquitetura modular de serviços:
+## 📖 Como Usar o Sistema
 
-#### **PersonService** (`app/services/personService.ts`)
-- ✅ **CRUD completo** de pessoas
-- ✅ **Busca com debounce** de pessoas
-- ✅ **Mapeamento automático** entre formatos da API e frontend
-- ✅ **Tratamento de erros** específico para pessoas
-- ✅ **Usa HttpClient** - Integração com cliente Axios
+### 🏠 Página Inicial
 
-#### **ReferenceService** (`app/services/referenceService.ts`)
-- ✅ **Busca de nacionalidades** com autocomplete
-- ✅ **Busca de naturalidades** com autocomplete
-- ✅ **Debounce configurável** para cada campo
-- ✅ **Tratamento de erros** específico para referências
-- ✅ **Usa HttpClient** - Integração com cliente Axios
+- Acesse `http://localhost:5173` (desenvolvimento) ou `http://localhost:3000` (produção)
+- Você será direcionado para a página de login ou home se já estiver autenticado
 
-### Busca com Debounce
+### 👥 Gerenciando Pessoas
 
-O sistema implementa busca em tempo real com debounce de 500ms:
+#### **Listando Pessoas**
 
-- ✅ **Debounce de 500ms** - Evita requisições excessivas
-- ✅ **Busca na API** - Não filtra dados locais
-- ✅ **Loading state** - Indicador visual durante busca
-- ✅ **Fallback** - Em caso de erro, carrega todas as pessoas
-- ✅ **Busca vazia** - Quando o campo está vazio, carrega todas as pessoas
+- A página inicial mostra todas as pessoas cadastradas
+- Use a barra de busca para encontrar pessoas específicas
 
-### Autocomplete
+#### **Cadastrando uma Nova Pessoa**
 
-O sistema implementa autocomplete com debounce para campos de referência:
+1. Clique no botão **"Nova Pessoa"** no canto superior direito
+2. Preencha o formulário:
+   - **Nome** (obrigatório): Nome completo da pessoa
+   - **CPF** (obrigatório): Será formatado automaticamente (000.000.000-00)
+   - **Data de Nascimento** (obrigatório): Use o seletor de data(não pode ser maior que a data atual)
+   - **E-mail** (opcional): E-mail válido
+   - **Sexo** (opcional): Use o autocomplete ou digite livremente
+   - **Naturalidade** (opcional): Use o autocomplete para buscar cidades
+   - **Nacionalidade** (opcional): Use o autocomplete para buscar países
+3. Clique em **"Salvar"**
+4. Uma notificação de sucesso aparecerá se tudo estiver correto
 
-- ✅ **Autocomplete para Naturalidade** - Busca em `/v1/reference/birthplaces`
-- ✅ **Autocomplete para Nacionalidade** - Busca em `/v1/reference/nationalities`
-- ✅ **Autocomplete para Sexo** - Sugestões locais ("Masculino", "Feminino")
-- ✅ **Debounce configurável** - 300ms para referências, 100ms para sexo
-- ✅ **Sugestões em dropdown** - Lista clicável de sugestões
-- ✅ **Loading state** - Indicador visual durante busca
-- ✅ **Click outside** - Fecha sugestões ao clicar fora
-- ✅ **Keyboard navigation** - Suporte a navegação por teclado
+#### **Editando uma Pessoa**
 
-### Mapeamento de Dados
+1. Na listagem, clique no ícone de **editar** (lápis) ao lado da pessoa
+2. O formulário será carregado com os dados atuais
+3. Faça as alterações necessárias
+4. Clique em **"Salvar"**
+5. Uma notificação de sucesso aparecerá
 
-O sistema faz mapeamento automático entre o formato da API e o formato do frontend:
+#### **Excluindo uma Pessoa**
 
-#### Formato da API:
-```json
-{
-  "id": 88,
-  "name": "Ana Costa Ferreira",
-  "gender": "Feminino",
-  "email": "ana.costa@email.com",
-  "birthDate": "1988-12-05T00:00:00.000Z",
-  "naturalness": "Salvador",
-  "nationality": "Brasileira",
-  "cpf": "100.000.004-00",
-  "address": "Largo do Pelourinho, 321 - Salvador/BA",
-  "createdAt": "2025-08-02T14:17:09.491Z",
-  "updatedAt": "2025-08-02T14:17:09.491Z"
-}
-```
+1. Na listagem, clique em **excluir** ao lado da pessoa
+2. Uma confirmação aparecerá
+3. Clique em **"Confirmar"** para excluir
 
-#### Formato do Frontend:
-```typescript
-{
-  id: "88",
-  nome: "Ana Costa Ferreira",
-  sexo: "Feminino",
-  email: "ana.costa@email.com",
-  dataNascimento: "1988-12-05",
-  naturalidade: "Salvador",
-  nacionalidade: "Brasileira",
-  cpf: "100.000.004-00"
-}
-```
+### 🔍 Funcionalidades de Busca e Autocomplete
 
-### Tratamento de Erros
+#### **Busca de Pessoas**
 
-O sistema trata os seguintes tipos de erro da API:
+- Digite na barra de busca para encontrar pessoas
+- A busca é feita em tempo real na API
+- Aguarde 500ms após parar de digitar para a busca ser executada
 
-- `ROUTE_NOT_FOUND` - Rota não encontrada
-- `RESOURCE_NOT_FOUND` - Recurso não encontrado
-- `USER_NOT_FOUND` - Usuário não encontrado
-- `PERSON_NOT_FOUND` - Pessoa não encontrada
-- `VALIDATION_ERROR` - Erro de validação
-- `INVALID_CPF` - CPF inválido
-- `INVALID_EMAIL` - E-mail inválido
-- `REQUIRED_FIELD` - Campo obrigatório não preenchido
-- `CONFLICT_ERROR` - Conflito de dados
-- `PERSON_ALREADY_EXISTS` - Pessoa já existe
-- `EMAIL_ALREADY_EXISTS` - E-mail já existe
-- `INTERNAL_SERVER_ERROR` - Erro interno do servidor
-- `DATABASE_ERROR` - Erro no banco de dados
-- `UNKNOWN_ERROR` - Erro desconhecido (mostra mensagem da API)
-- `TIMEOUT_ERROR` - Timeout da requisição
-- `NETWORK_ERROR` - Erro de conexão
+#### **Autocomplete**
 
-### Formato de Resposta de Erro
+- **Naturalidade**: Digite para buscar cidades automaticamente
+- **Nacionalidade**: Digite para buscar países automaticamente
+- **Sexo**: Digite ou selecione entre "Masculino" e "Feminino"
 
-```json
-{
-  "statusCode": 400,
-  "error": "INVALID_EMAIL",
-  "message": ["email must be an email"],
-  "timestamp": "2025-08-02T10:22:51.288Z",
-  "path": "/v1/people"
-}
-```
+### Configuração da API
 
-## Configuração
+O sistema espera que a API esteja rodando em `http://localhost:4001`. Se sua API estiver em um endereço diferente, você pode alterar a configuração em `app/config/api.ts`.
 
-### Pré-requisitos
-
-- Node.js 18+
-- API backend rodando em `localhost:4001`
-
-### Instalação
+## 🧪 Testes
 
 ```bash
-npm install
+# Executar todos os testes
+npm test
+
+# Executar testes em modo watch
+npm test -- --watch
+
+# Executar testes com coverage
+npm test -- --coverage
 ```
 
-### Desenvolvimento
+## 🐛 Solução de Problemas
 
-```bash
-npm run dev
-```
+### Problema: "API não encontrada"
 
-### Build
+- Verifique se a API está rodando em `localhost:4001`
+- Verifique se não há firewall bloqueando a conexão
 
-```bash
-npm run build
-```
+### Problema: "Erro de build"
 
-## Funcionalidades Detalhadas
+- Execute `npm install` para reinstalar dependências
+- Verifique se está usando Node.js 18+
+
+### Problema: "Página não carrega"
+
+- Verifique se o servidor está rodando (`npm run dev`)
+- Verifique se a porta 5173 não está sendo usada por outro processo
+
+### Problema: "Autocomplete não funciona"
+
+- Verifique se a API de referências está funcionando
+- Verifique a conexão com a internet(se a api não estiver rodando localmente)
+
+## 📝 Notas de Desenvolvimento
 
 ### Validação de CPF
 
-- Validação em tempo real durante digitação
 - Formatação automática (000.000.000-00)
 - Verificação de unicidade no sistema
-- Validação de dígitos verificadores
-
-### Formulário de Pessoa
-
-- Campos obrigatórios: Nome, CPF, Data de Nascimento
-- Campos opcionais: E-mail, Sexo, Naturalidade, Nacionalidade
-- Validação em tempo real
-- Estados de loading durante submissão
-- Tratamento de erros da API
-- **Autocomplete para Naturalidade, Nacionalidade e Sexo**
-
-### Listagem de Pessoas
-
-- **Busca com debounce** de 500ms
-- **Requisições para API** ao invés de filtrar localmente
-- Estados de loading e erro
-- Ações de editar e excluir
-- Indicador visual durante busca
-
-### Autocomplete
-
-- **Componente reutilizável** `AutocompleteInput`
-- **Debounce configurável** por campo (100ms para sexo, 300ms para referências)
-- **Sugestões em dropdown** com scroll
-- **Loading state** durante busca
-- **Click outside** para fechar sugestões
-- **Integração com React Hook Form**
-- **Sugestões locais** para sexo ("Masculino", "Feminino")
-
-### Notificações
-
-- Notificações de sucesso (verde)
-- Notificações de erro (vermelho)
-- Auto-dismiss após 3-5 segundos
-- Botão de fechar manual
-
-## Estrutura de Dados
-
-### Pessoa (Person) - Frontend
-
-```typescript
-interface Person {
-  id?: string;
-  nome: string;
-  sexo?: string; // Aceita qualquer texto
-  email?: string;
-  dataNascimento: string;
-  naturalidade?: string;
-  nacionalidade?: string;
-  cpf: string;
-}
-```
-
-### Pessoa (APIPerson) - API
-
-```typescript
-interface APIPerson {
-  id: number;
-  name: string;
-  gender: string; // Aceita qualquer texto
-  email: string;
-  birthDate: string;
-  naturalness: string;
-  nationality: string;
-  cpf: string;
-  address?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-```
-
-## Melhorias Futuras
-
-- [ ] Paginação na listagem
-- [ ] Filtros avançados
-- [ ] Exportação de dados
-- [ ] Upload de fotos
-- [ ] Histórico de alterações
-- [ ] Autenticação e autorização
-- [ ] Testes automatizados
-- [ ] PWA (Progressive Web App)
