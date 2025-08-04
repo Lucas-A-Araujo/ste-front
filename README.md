@@ -77,7 +77,7 @@ Sistema frontend para gerenciamento de pessoas com integração completa com API
 
 #### **Editando uma Pessoa**
 
-1. Na listagem, clique no ícone de **editar** (lápis) ao lado da pessoa
+1. Na listagem, clique no **editar** ao lado da pessoa
 2. O formulário será carregado com os dados atuais
 3. Faça as alterações necessárias
 4. Clique em **"Salvar"**
@@ -124,23 +124,13 @@ npm test -- --coverage
 
 ### Problema: "API não encontrada"
 
-- Verifique se a API está rodando em `localhost:4001`
+- Verifique se a API está rodando em `localhost:4001` ou na URL que você configurou
 - Verifique se não há firewall bloqueando a conexão
 
 ### Problema: "Erro de build"
 
 - Execute `npm install` para reinstalar dependências
 - Verifique se está usando Node.js 18+
-
-### Problema: "Página não carrega"
-
-- Verifique se o servidor está rodando (`npm run dev`)
-- Verifique se a porta 5173 não está sendo usada por outro processo
-
-### Problema: "Autocomplete não funciona"
-
-- Verifique se a API de referências está funcionando
-- Verifique a conexão com a internet(se a api não estiver rodando localmente)
 
 ## 📝 Notas de Desenvolvimento
 
