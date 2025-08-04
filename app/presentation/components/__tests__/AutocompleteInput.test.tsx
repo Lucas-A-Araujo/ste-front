@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { AutocompleteInput } from '../AutocompleteInput'
+import { AutocompleteInput } from '../inputs/AutocompleteInput'
 
 // Mock do useDebounce
 vi.mock('../../controllers/hooks/useDebounce', () => ({

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
+import { useAuth } from "../../controllers/contexts/AuthContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
 import { Notification } from "../components/Notification";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { ProtectedRoute } from "../components/ProtectedRoute";
-import { FaSearch, FaPlus } from "react-icons/fa";
+import { BaseInput } from "../components/inputs";
+import { FaPlus } from "react-icons/fa";
 import { useDebounce } from "../../controllers/hooks/useDebounce";
 import { useSessionStorage } from "../../controllers/hooks/useSessionStorage";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
@@ -17,6 +19,7 @@ import type { Person } from "../../domain/types/person";
 function HomeContent() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { 
     persons, 
     deletePerson, 
@@ -51,15 +54,17 @@ function HomeContent() {
   }, []);
 
   useEffect(() => {
-    const urlSearch = searchParams.get("q");
-    const urlPage = parseInt(searchParams.get("page") || "1");
-    
-    if (urlSearch) {
-      searchPeople(urlSearch, urlPage);
-    } else {
-      loadPeople(urlPage);
+    if (!authLoading && isAuthenticated) {
+      const urlSearch = searchParams.get("q");
+      const urlPage = parseInt(searchParams.get("page") || "1");
+      
+      if (urlSearch) {
+        searchPeople(urlSearch, urlPage);
+      } else {
+        loadPeople(urlPage);
+      }
     }
-  }, [searchParams, searchPeople, loadPeople]);
+  }, [searchParams, searchPeople, loadPeople, isAuthenticated, authLoading]);
 
   useEffect(() => {
     if (debouncedSearchTerm !== searchParams.get("q")) {
@@ -191,23 +196,15 @@ function HomeContent() {
             
             <div className="flex justify-between items-center">
               <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaSearch className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Buscar pessoas..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
-                  />
-                  {searchLoading && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                    </div>
-                  )}
-                </div>
+                <BaseInput
+                  id="search"
+                  name="search"
+                  type="search"
+                  placeholder="Buscar pessoas..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  loading={searchLoading}
+                />
               </div>
               <button
                 onClick={handleNewUser}

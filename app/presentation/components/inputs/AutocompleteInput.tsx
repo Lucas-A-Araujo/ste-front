@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDebounce } from "../../controllers/hooks/useDebounce";
+import { useDebounce } from "../../../controllers/hooks/useDebounce";
 
 interface AutocompleteInputProps {
   label: string;
@@ -9,6 +9,8 @@ interface AutocompleteInputProps {
   onSearch: (query: string) => Promise<string[]>;
   debounceDelay?: number;
   error?: string;
+  required?: boolean;
+  showRequiredIndicator?: boolean;
 }
 
 export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
@@ -19,6 +21,8 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   onSearch,
   debounceDelay = 300,
   error,
+  required = false,
+  showRequiredIndicator = false,
 }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -87,8 +91,8 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
   return (
     <div ref={wrapperRef} className="relative">
-      <label htmlFor={label.toLowerCase()} className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
+      <label htmlFor={label.toLowerCase()} className="block text-sm font-medium text-gray-700 mb-2">
+        {label} {required && showRequiredIndicator && <span className="text-gray-500">(obrigatório)</span>}
       </label>
       <input
         type="text"
@@ -97,7 +101,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         value={inputValue}
         onChange={handleInputChange}
         onFocus={handleInputFocus}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
+        className={`w-full px-3 py-3 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 ${
           error ? 'border-red-300' : 'border-gray-300'
         }`}
       />

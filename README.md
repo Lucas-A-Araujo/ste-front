@@ -52,7 +52,7 @@ Sistema frontend para gerenciamento de pessoas com integração completa com API
 ### 🏠 Página Inicial
 
 - Acesse `http://localhost:5173`
-- Você será direcionado para a página de login ou home se já estiver autenticado
+- Você será direcionado para a página de login(/login) ou home(home) se já estiver autenticado
 
 ### 👥 Gerenciando Pessoas
 

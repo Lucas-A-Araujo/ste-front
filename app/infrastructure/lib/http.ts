@@ -15,17 +15,23 @@ export class HttpError extends Error {
 
 const getAuthToken = (): string | null => {
   try {
-    return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const authData = localStorage.getItem(STORAGE_KEYS.AUTH_DATA);
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed.token) {
+        return parsed.token;
+      }
+    }
+    return null;
   } catch (error) {
-    console.error('Erro ao acessar auth_token:', error);
+    console.error('Erro ao acessar token de autenticação:', error);
     return null;
   }
 };
 
 const removeAuthData = (): void => {
   try {
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
   } catch (error) {
     console.error('Erro ao remover dados de autenticação:', error);
   }
@@ -33,6 +39,7 @@ const removeAuthData = (): void => {
 
 class HttpClient {
   private client: AxiosInstance;
+  private isRedirecting = false;
 
   constructor() {
     this.client = axios.create({
@@ -49,13 +56,9 @@ class HttpClient {
   private setupInterceptors() {
     this.client.interceptors.request.use(
       (config) => {
-        // Adicionar token de autenticação se disponível
         const token = getAuthToken();
         if (token) {
           config.headers.Authorization = AUTH_CONFIG.TOKEN_PREFIX + token;
-          console.log('Token adicionado à requisição:', token.substring(0, 20) + '...');
-        } else {
-          console.log('Nenhum token encontrado no localStorage');
         }
         return config;
       },
@@ -72,11 +75,16 @@ class HttpClient {
         if (error.response) {
           const errorData = error.response.data as APIErrorResponse;
           
-          // Se receber 401 (Unauthorized), limpar token e redirecionar para login
-          if (error.response.status === 401) {
-            console.log('Erro 401 - Token inválido, redirecionando para login');
+          if (error.response.status === 401 && !this.isRedirecting) {
+            this.isRedirecting = true;
             removeAuthData();
-            window.location.href = '/login';
+            
+            setTimeout(() => {
+              if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+              }
+              this.isRedirecting = false;
+            }, 100);
           }
           
           throw new HttpError(
