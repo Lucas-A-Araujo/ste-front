@@ -18,6 +18,7 @@ function UserDetailContent() {
   const { updatePerson, addPerson } = usePersons();
   const [person, setPerson] = useState<Person | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+  const [loadingPerson, setLoadingPerson] = useState(id && id !== "new");
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<"success" | "error">("error");
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -37,7 +38,11 @@ function UserDetailContent() {
           setPerson(personData);
         } catch (error) {
           showError(ERROR_MESSAGES.PERSON_NOT_FOUND);
+        } finally {
+          setLoadingPerson(false);
         }
+      } else {
+        setLoadingPerson(false);
       }
     };
 
@@ -95,7 +100,19 @@ function UserDetailContent() {
     navigate("/");
   };
 
-  if (id && id !== "new" && !person) {
+  if (id && id !== "new" && loadingPerson) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Carregando...</h2>
+          <p className="text-gray-600">Buscando dados da pessoa</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (id && id !== "new" && !loadingPerson && !person) {
     return (
       <Layout>
         <div className="text-center py-12">
