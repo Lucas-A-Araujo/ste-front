@@ -115,7 +115,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             placeholder="Digite o nome completo"
             value={watch("nome") || ""}
             onChange={(e) => {
-              register("nome").onChange(e);
+              setValue("nome", e.target.value);
               handleFieldChange("nome");
             }}
             error={errors.nome?.message || validationErrors.nome}
@@ -131,7 +131,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             placeholder="000.000.000-00"
             value={watch("cpf") || ""}
             onChange={(e) => {
-              register("cpf").onChange(e);
+              setValue("cpf", e.target.value);
               handleFieldChange("cpf");
             }}
             error={errors.cpf?.message || validationErrors.cpf}
@@ -147,7 +147,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             placeholder="Digite o e-mail"
             value={watch("email") || ""}
             onChange={(e) => {
-              register("email").onChange(e);
+              setValue("email", e.target.value);
               handleFieldChange("email");
             }}
             error={errors.email?.message || validationErrors.email}
@@ -160,7 +160,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({
             type="date"
             value={watch("dataNascimento") || ""}
             onChange={(e) => {
-              register("dataNascimento").onChange(e);
+              setValue("dataNascimento", e.target.value);
               handleFieldChange("dataNascimento");
             }}
             error={errors.dataNascimento?.message || validationErrors.dataNascimento}
