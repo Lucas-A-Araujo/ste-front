@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../controllers/contexts/AuthContext";
 import { Notification } from "../components/Notification";
-import { FaEye, FaEyeSlash, FaSignInAlt, FaUser, FaLock, FaBuilding } from "react-icons/fa";
+import { BaseInput } from "../components/inputs";
+import { FaSignInAlt, FaBuilding } from "react-icons/fa";
 
 export function meta() {
   return [
@@ -20,7 +21,6 @@ export default function Login() {
     password: "",
   });
   
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [showNotification, setShowNotification] = useState(false);
 
@@ -73,10 +73,6 @@ export default function Login() {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
     <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
@@ -95,62 +91,31 @@ export default function Login() {
 
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-white/30">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                  placeholder="Digite seu email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                />
-              </div>
-            </div>
+            <BaseInput
+              id="email"
+              name="email"
+              label="Email"
+              type="email"
+              placeholder="Digite seu email"
+              value={formData.email}
+              onChange={handleInputChange}
+              disabled={loading}
+              required
+              autoComplete="email"
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Senha
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                  placeholder="Digite sua senha"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                  onClick={togglePasswordVisibility}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="h-4 w-4" />
-                  ) : (
-                    <FaEye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
+            <BaseInput
+              id="password"
+              name="password"
+              label="Senha"
+              type="password"
+              placeholder="Digite sua senha"
+              value={formData.password}
+              onChange={handleInputChange}
+              disabled={loading}
+              required
+              autoComplete="current-password"
+            />
 
             {error && (
               <div className="bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-md p-3">

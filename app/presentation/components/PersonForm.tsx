@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Person } from "../../domain/types/person";
-import { PersonSchema, validateCPF, formatCPF } from "../../domain/types/person";
+import { PersonSchema, validateCPF } from "../../domain/types/person";
 import { Notification } from "./Notification";
-import { AutocompleteInput } from "./AutocompleteInput";
+import { BaseInput, AutocompleteInput } from "./inputs";
 import { referenceRepository } from "../../infrastructure/repositories/referenceRepository";
 import { FORM_CONFIG } from "../../controllers/constants/ui.constant";
 
@@ -55,31 +55,6 @@ export const PersonForm: React.FC<PersonFormProps> = ({
       cpf: "",
     },
   });
-
-  const formatCPFInRealTime = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    
-    const limitedNumbers = numbers.slice(0, 11);
-    
-    if (limitedNumbers.length <= 3) {
-      return limitedNumbers;
-    } else if (limitedNumbers.length <= 6) {
-      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3)}`;
-    } else if (limitedNumbers.length <= 9) {
-      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3, 6)}.${limitedNumbers.slice(6)}`;
-    } else {
-      return `${limitedNumbers.slice(0, 3)}.${limitedNumbers.slice(3, 6)}.${limitedNumbers.slice(6, 9)}-${limitedNumbers.slice(9)}`;
-    }
-  };
-
-  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedValue = formatCPFInRealTime(e.target.value);
-    setValue("cpf", formattedValue);
-    
-    if (validationErrors.cpf) {
-      setValidationErrors(prev => ({ ...prev, cpf: "" }));
-    }
-  };
 
   const handleFieldChange = (field: keyof Person) => {
     if (validationErrors[field]) {
@@ -132,91 +107,67 @@ export const PersonForm: React.FC<PersonFormProps> = ({
       
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
-              Nome (obrigatório)
-            </label>
-            <input
-              {...register("nome")}
-              type="text"
-              id="nome"
-              onChange={(e) => {
-                register("nome").onChange(e);
-                handleFieldChange("nome");
-              }}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
-                errors.nome ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {(errors.nome || validationErrors.nome) && (
-              <p className="mt-1 text-sm text-red-600">{errors.nome?.message || validationErrors.nome}</p>
-            )}
-          </div>
+          <BaseInput
+            id="nome"
+            name="nome"
+            label="Nome"
+            type="text"
+            placeholder="Digite o nome completo"
+            value={watch("nome") || ""}
+            onChange={(e) => {
+              register("nome").onChange(e);
+              handleFieldChange("nome");
+            }}
+            error={errors.nome?.message || validationErrors.nome}
+            required
+            showRequiredIndicator
+          />
 
-          <div>
-            <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
-              CPF (obrigatório)
-            </label>
-            <input
-              {...register("cpf")}
-              type="text"
-              id="cpf"
-              placeholder="000.000.000-00"
-              maxLength={14}
-              onChange={handleCPFChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
-                errors.cpf || validationErrors.cpf ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {(errors.cpf || validationErrors.cpf) && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.cpf?.message || validationErrors.cpf}
-              </p>
-            )}
-          </div>
+          <BaseInput
+            id="cpf"
+            name="cpf"
+            label="CPF"
+            type="cpf"
+            placeholder="000.000.000-00"
+            value={watch("cpf") || ""}
+            onChange={(e) => {
+              register("cpf").onChange(e);
+              handleFieldChange("cpf");
+            }}
+            error={errors.cpf?.message || validationErrors.cpf}
+            required
+            showRequiredIndicator
+          />
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              E-mail
-            </label>
-            <input
-              {...register("email")}
-              type="email"
-              id="email"
-              onChange={(e) => {
-                register("email").onChange(e);
-                handleFieldChange("email");
-              }}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
-                errors.email ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {(errors.email || validationErrors.email) && (
-              <p className="mt-1 text-sm text-red-600">{errors.email?.message || validationErrors.email}</p>
-            )}
-          </div>
+          <BaseInput
+            id="email"
+            name="email"
+            label="E-mail"
+            type="email"
+            placeholder="Digite o e-mail"
+            value={watch("email") || ""}
+            onChange={(e) => {
+              register("email").onChange(e);
+              handleFieldChange("email");
+            }}
+            error={errors.email?.message || validationErrors.email}
+          />
 
-          <div>
-            <label htmlFor="dataNascimento" className="block text-sm font-medium text-gray-700 mb-1">
-              Data de Nascimento (obrigatório)
-            </label>
-            <input
-              {...register("dataNascimento")}
-              type="date"
-              id="dataNascimento"
-              max={getMaxDate()}
-              onChange={(e) => {
-                register("dataNascimento").onChange(e);
-                handleFieldChange("dataNascimento");
-              }}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary ${
-                errors.dataNascimento ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {(errors.dataNascimento || validationErrors.dataNascimento) && (
-              <p className="mt-1 text-sm text-red-600">{errors.dataNascimento?.message || validationErrors.dataNascimento}</p>
-            )}
-          </div>
+          <BaseInput
+            id="dataNascimento"
+            name="dataNascimento"
+            label="Data de Nascimento"
+            type="date"
+            value={watch("dataNascimento") || ""}
+            onChange={(e) => {
+              register("dataNascimento").onChange(e);
+              handleFieldChange("dataNascimento");
+            }}
+            error={errors.dataNascimento?.message || validationErrors.dataNascimento}
+            max={getMaxDate()}
+            required
+            showRequiredIndicator
+          />
 
           <AutocompleteInput
             label="Sexo"
