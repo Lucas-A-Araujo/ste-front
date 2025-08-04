@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { PersonProvider, usePersons } from "../../controllers/contexts/PersonContext";
+import { useAuth } from "../../controllers/contexts/AuthContext";
 import { PersonList } from "../components/PersonList";
 import { Layout } from "../components/Layout";
 import { Notification } from "../components/Notification";
@@ -17,6 +18,7 @@ import type { Person } from "../../domain/types/person";
 function HomeContent() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { 
     persons, 
     deletePerson, 
@@ -51,15 +53,17 @@ function HomeContent() {
   }, []);
 
   useEffect(() => {
-    const urlSearch = searchParams.get("q");
-    const urlPage = parseInt(searchParams.get("page") || "1");
-    
-    if (urlSearch) {
-      searchPeople(urlSearch, urlPage);
-    } else {
-      loadPeople(urlPage);
+    if (!authLoading && isAuthenticated) {
+      const urlSearch = searchParams.get("q");
+      const urlPage = parseInt(searchParams.get("page") || "1");
+      
+      if (urlSearch) {
+        searchPeople(urlSearch, urlPage);
+      } else {
+        loadPeople(urlPage);
+      }
     }
-  }, [searchParams, searchPeople, loadPeople]);
+  }, [searchParams, searchPeople, loadPeople, isAuthenticated, authLoading]);
 
   useEffect(() => {
     if (debouncedSearchTerm !== searchParams.get("q")) {
